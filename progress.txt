@@ -1,0 +1,51 @@
+Mr. Computers implementation progress
+======================================
+
+Completed
+---------
+- Project configuration now uses PostgreSQL only; database credentials and production secret key come from environment variables.
+- Created the modular Django apps: accounts, catalog, inventory, cart, orders, payments, promotions, PC builder, reviews, shipping, CMS, reports, audit, and dashboard.
+- Added UUID/timestamped relational models for the commerce, inventory, CMS, audit, customer, and PC-builder domains, including important database constraints and historical order snapshots.
+- Added server-side image validation: product images must be strictly smaller than 150 KB; hero/banner images may be up to 300 KB. Upload validation checks actual image content, allowed format, extension, and dimensions, and storage paths use generated names.
+- Added initial catalog, cart, checkout/order, coupon, inventory, account, CMS, review, PC-builder, and staff-dashboard services/views. Coupons are restricted to signed-in users and are revalidated during checkout.
+- Added inventory adjustment transactions, transactional stock deduction/order creation, staff-role checks, risk scoring, basic request throttling, audit events, and a revalidated product-media cleanup lifecycle.
+- Added editable owner dashboard workflows for categories, brands, coupons, homepage sections, banners, pages, settings, products, stock, and orders.
+- Added immutable order-status timeline entries, dashboard rendering, read-only admin visibility, and a migration to initialize timeline entries for existing orders.
+- Added tests for product/hero image byte boundaries, invalid content type suffixes, and the exact 150 KB / 300 KB rules.
+- Redesigned the storefront header, category strip, hero, sample product cards, promotional collections, trust benefits, and support banner to follow `frontend_uiux.png`.
+- Rebuilt the staff dashboard shell with a dark sidebar, compact responsive navigation, KPI cards, real sales/status charts, recent orders/activity, top products, stock alerts, and quick actions.
+- Added development-only sample catalog previews when no products exist; sample sales/orders are never fabricated. Corrected the dashboard report's unresolved `models.F` reference.
+- Added Django Admin registration as a technical fallback.
+
+Validation status
+-----------------
+- `DJANGO_DEBUG=1 python manage.py check` passes.
+- `DJANGO_DEBUG=1 python manage.py test core.tests` passes (3 image-validation tests).
+- All Django templates compile successfully.
+- Storefront and dashboard templates render with preview context and resolve all referenced routes.
+- `makemigrations --check --dry-run` reports no model/migration drift. It warns that PostgreSQL is not running at the configured local address.
+- PostgreSQL accepts connections on port 5432 here, but this process has no local database password configured; applying migrations and database-backed checkout/inventory/dashboard tests remain unverified.
+
+Important behavior
+------------------
+- Checkout permits guests and uses Cash on Delivery; stock and prices are recalculated server-side inside a database transaction.
+- Image cleanup is not run synchronously. Zero stock for two days only makes eligible non-primary product images cleanup candidates; candidates receive a seven-day grace period and are rechecked before object deletion.
+- Configure `DJANGO_DEBUG=1` for local development. Production must set `DJANGO_SECRET_KEY`, PostgreSQL settings, allowed hosts, HTTPS settings, and a shared `REDIS_URL` for distributed rate limiting.
+
+Local setup
+-----------
+1. Create and activate a virtual environment, then install `requirements.txt`.
+2. Start the local PostgreSQL service, then create a PostgreSQL login role and database owned by that role.
+3. Export `DJANGO_DEBUG=1` and the `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, and `POSTGRES_PORT` values for the local database.
+4. Run `python manage.py migrate`, then `python manage.py createsuperuser`.
+5. Start the development server with `python manage.py runserver`.
+6. For production also set `DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `REDIS_URL`, TLS/HTTPS settings, and persistent object/media storage.
+
+Local Kali startup troubleshooting (checked 2026-10-21)
+------------------------------------------------------
+- System Python has Django, Pillow, and psycopg installed.
+- `DJANGO_DEBUG=1 python3 manage.py check` succeeds. Without that environment variable, settings correctly reject a missing production secret key.
+- `runserver` cannot start until PostgreSQL is reachable: this machine has PostgreSQL 17 and 18 clusters installed, both stopped; the configured PostgreSQL port is 5432 (cluster 18).
+- Start the local database with `sudo pg_ctlcluster 18 main start`. Create a local role/database with `sudo -u postgres psql`, then configure `POSTGRES_*` values to match. `sudo` requires the developer's password, so it cannot be run from this session.
+- Then run `export DJANGO_DEBUG=1 POSTGRES_DB=mrcomputers POSTGRES_USER=mrcomputers POSTGRES_PASSWORD='<your-local-password>' POSTGRES_HOST=127.0.0.1 POSTGRES_PORT=5432`, followed by `python3 manage.py migrate` and `python3 manage.py runserver`.
+- Do not use SQLite as a workaround; this application is configured for PostgreSQL.

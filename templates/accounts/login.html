@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Sign in | Mr. Computers{% endblock %}
+{% block content %}
+<div class="auth-card"><span class="eyebrow">Welcome back</span><h1>Sign in</h1><p class="text-secondary">Sign in to manage your account and use member coupons.</p>
+<form method="post">{% csrf_token %}{% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% for field in form %}<div class="form-field mb-3">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endfor %}<button class="btn btn-primary w-100" type="submit">Sign in</button></form>
+<div class="d-flex justify-content-between mt-3"><a href="{% url 'accounts:password_reset' %}">Forgot password?</a><a href="{% url 'accounts:register' %}">Create account</a></div></div>
+{% endblock %}

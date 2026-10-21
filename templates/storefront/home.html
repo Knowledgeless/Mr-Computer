@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Mr. Computers | Build your dream PC{% endblock %}
+{% block main_class %}container-fluid storefront-home px-3 px-lg-4 py-3 py-lg-4{% endblock %}
+{% block content %}
+{% if banners %}
+    {% with hero=banners.0 %}
+    <section class="hero-panel hero-panel--store">
+        <div class="hero-copy">
+            <span class="eyebrow">Your tech. Our priority.</span>
+            <h1>{{ hero.title }}</h1>
+            <p>{{ hero.subtitle|default:"Custom builds. Premium components. Expert support." }}</p>
+            {% if hero.button_text and hero.button_url %}<a class="btn btn-primary btn-lg" href="{{ hero.button_url }}">{{ hero.button_text }} <i class="bi bi-arrow-right"></i></a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'pc_builder:builder' %}">Start building <i class="bi bi-arrow-right"></i></a>{% endif %}
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="hero-art__glow"></div><i class="bi bi-pc-display-horizontal"></i><i class="bi bi-laptop"></i><span class="hero-art__orb hero-art__orb--one"></span><span class="hero-art__orb hero-art__orb--two"></span></div>
+        <div class="hero-benefits"><div><i class="bi bi-shield-check"></i><span><strong>Top quality products</strong><small>Genuine & trusted</small></span></div><div><i class="bi bi-tag"></i><span><strong>Best prices</strong><small>Great deals, always</small></span></div><div><i class="bi bi-truck"></i><span><strong>Fast & safe delivery</strong><small>Across the country</small></span></div><div><i class="bi bi-headset"></i><span><strong>Expert support</strong><small>Before & after sale</small></span></div></div>
+    </section>
+    {% endwith %}
+{% else %}
+    <section class="hero-panel hero-panel--store hero-panel--fallback">
+        <div class="hero-copy">
+            <span class="eyebrow">Your tech. Our priority.</span>
+            <h1>Build Your Dream PC</h1>
+            <p>Custom builds. Premium components. Expert support.</p>
+            <a class="btn btn-primary btn-lg" href="{% url 'pc_builder:builder' %}">Start building <i class="bi bi-arrow-right"></i></a>
+        </div>
+        <div class="hero-art" aria-hidden="true"><div class="hero-art__glow"></div><i class="bi bi-pc-display-horizontal"></i><i class="bi bi-laptop"></i><span class="hero-art__orb hero-art__orb--one"></span><span class="hero-art__orb hero-art__orb--two"></span></div>
+        <div class="hero-benefits"><div><i class="bi bi-shield-check"></i><span><strong>Top quality products</strong><small>Genuine & trusted</small></span></div><div><i class="bi bi-tag"></i><span><strong>Best prices</strong><small>Great deals, always</small></span></div><div><i class="bi bi-truck"></i><span><strong>Fast & safe delivery</strong><small>Across the country</small></span></div><div><i class="bi bi-headset"></i><span><strong>Expert support</strong><small>Before & after sale</small></span></div></div>
+    </section>
+{% endif %}
+
+<section class="home-categories" aria-labelledby="home-categories-title">
+    <div class="section-heading"><div><span class="eyebrow">Find your gear</span><h2 id="home-categories-title">Shop by category</h2></div><a href="{% url 'catalog:product_list' %}">All categories <i class="bi bi-arrow-right"></i></a></div>
+    <div class="category-showcase">
+        {% for category in categories %}
+        <a class="category-showcase__item" href="{% url 'catalog:category' category.slug %}">{% if category.image %}<img src="{{ category.image.url }}" alt="" loading="lazy">{% else %}<span class="category-showcase__icon"><i class="bi bi-box-seam"></i></span>{% endif %}<strong>{{ category.name }}</strong><small>Explore products</small></a>
+        {% empty %}
+        {% if demo_products %}
+        <a class="category-showcase__item" href="{% url 'catalog:product_list' %}?q=component"><span class="category-showcase__icon tone-blue"><i class="bi bi-cpu"></i></span><strong>Computer Components</strong><small>CPU, GPU, RAM & more</small></a>
+        <a class="category-showcase__item" href="{% url 'pc_builder:builder' %}"><span class="category-showcase__icon tone-violet"><i class="bi bi-pc-display"></i></span><strong>Custom PC Builds</strong><small>Your dream. Our build.</small></a>
+        <a class="category-showcase__item" href="{% url 'catalog:product_list' %}?q=laptop"><span class="category-showcase__icon tone-slate"><i class="bi bi-laptop"></i></span><strong>Laptops</strong><small>New & refurbished</small></a>
+        <a class="category-showcase__item" href="{% url 'catalog:product_list' %}?q=audio"><span class="category-showcase__icon tone-green"><i class="bi bi-headphones"></i></span><strong>Oraimo Products</strong><small>Smart life, better you</small></a>
+        <a class="category-showcase__item" href="{% url 'catalog:product_list' %}?q=phone"><span class="category-showcase__icon tone-orange"><i class="bi bi-phone"></i></span><strong>Mobile Phones</strong><small>Reliable & simple</small></a>
+        <a class="category-showcase__item" href="{% url 'catalog:product_list' %}?q=accessory"><span class="category-showcase__icon tone-cyan"><i class="bi bi-headset"></i></span><strong>Mobile Accessories</strong><small>Covers, chargers & more</small></a>
+        <a class="category-showcase__item" href="{% url 'catalog:product_list' %}?q=router"><span class="category-showcase__icon tone-blue"><i class="bi bi-router"></i></span><strong>Routers & Networking</strong><small>Stay connected</small></a>
+        {% else %}
+        <a class="category-showcase__item" href="{% url 'catalog:product_list' %}"><span class="category-showcase__icon"><i class="bi bi-box-seam"></i></span><strong>Explore our store</strong><small>Products coming soon</small></a>
+        {% endif %}
+        {% endfor %}
+    </div>
+</section>
+
+{% if demo_products %}
+<section class="content-section home-products">
+    <div class="section-heading"><div><span class="eyebrow">Popular picks</span><h2>Featured products</h2><span class="demo-note"><i class="bi bi-info-circle"></i> Sample products shown for the design preview</span></div><a href="{% url 'catalog:product_list' %}">Browse all <i class="bi bi-arrow-right"></i></a></div>
+    <div class="row g-3 g-xl-4">{% for product in demo_products %}<div class="col-6 col-md-4 col-xl-2">{% include "partials/demo_product_card.html" %}</div>{% endfor %}</div>
+</section>
+{% elif featured_products %}
+<section class="content-section home-products">
+    <div class="section-heading"><div><span class="eyebrow">Picked for you</span><h2>Featured products</h2></div><a href="{% url 'catalog:product_list' %}">Browse all <i class="bi bi-arrow-right"></i></a></div>
+    <div class="row g-3 g-xl-4">{% for product in featured_products %}<div class="col-6 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div>
+</section>
+{% endif %}
+
+{% if demo_products %}
+<section class="promo-grid" aria-label="Featured collections">
+    <a class="promo-tile promo-tile--green" href="{% url 'catalog:product_list' %}?q=oraimo"><span>Oraimo</span><strong>Smart devices for a better you</strong><i class="bi bi-earbuds"></i><small>Shop now <i class="bi bi-arrow-right"></i></small></a>
+    <a class="promo-tile promo-tile--violet" href="{% url 'catalog:product_list' %}?condition=REFURBISHED"><span>Refurbished laptops</span><strong>Quality. Affordable. Reliable.</strong><i class="bi bi-laptop"></i><small>Shop now <i class="bi bi-arrow-right"></i></small></a>
+    <a class="promo-tile promo-tile--blue" href="{% url 'catalog:product_list' %}?q=accessory"><span>Mobile accessories</span><strong>Everything for your phone</strong><i class="bi bi-phone"></i><small>Shop now <i class="bi bi-arrow-right"></i></small></a>
+</section>
+{% endif %}
+
+{% if best_sellers %}
+<section class="content-section home-products"><div class="section-heading"><div><span class="eyebrow">Customer favorites</span><h2>Best sellers</h2></div><a href="{% url 'catalog:product_list' %}">View all <i class="bi bi-arrow-right"></i></a></div><div class="row g-3">{% for product in best_sellers %}<div class="col-6 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div></section>
+{% endif %}
+{% if new_arrivals %}
+<section class="content-section home-products"><div class="section-heading"><div><span class="eyebrow">Just arrived</span><h2>New arrivals</h2></div><a href="{% url 'catalog:product_list' %}?sort=newest">See what's new <i class="bi bi-arrow-right"></i></a></div><div class="row g-3">{% for product in new_arrivals %}<div class="col-6 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div></section>
+{% endif %}
+
+<section class="store-benefits"><div><i class="bi bi-shield-check"></i><span><strong>100% genuine products</strong><small>Original & branded</small></span></div><div><i class="bi bi-credit-card"></i><span><strong>Secure payments</strong><small>Multiple payment options</small></span></div><div><i class="bi bi-cash-coin"></i><span><strong>Cash on delivery</strong><small>Pay when you receive</small></span></div><div><i class="bi bi-arrow-repeat"></i><span><strong>Easy returns</strong><small>Hassle-free service</small></span></div><div><i class="bi bi-headset"></i><span><strong>24/7 support</strong><small>We're here to help</small></span></div></section>
+<section class="builder-banner"><div class="builder-banner__art"><i class="bi bi-pc-display-horizontal"></i><i class="bi bi-laptop"></i></div><div><h2>Need help finding the right product?</h2><p>Our experts are here to help you choose the best for your needs.</p></div><a class="btn btn-primary" href="{% url 'cms:contact' %}">Contact us <i class="bi bi-arrow-right"></i></a></section>
+{% endblock %}

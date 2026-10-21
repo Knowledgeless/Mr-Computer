@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ product.meta_title|default:product.name }} | Mr. Computers{% endblock %}
+{% block meta %}<meta name="description" content="{{ product.meta_description|default:product.short_description }}">{% endblock %}
+{% block content %}
+<nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Home</a></li><li class="breadcrumb-item"><a href="{% url 'catalog:category' product.category.slug %}">{{ product.category.name }}</a></li><li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li></ol></nav>
+<div class="row g-4 g-lg-5 product-detail">
+    <div class="col-lg-6">
+        {% with image=product.images.all|first %}
+        <div class="product-detail__gallery">
+            {% if image %}<img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" width="720" height="720" fetchpriority="high">{% else %}<div class="image-placeholder image-placeholder--large"><i class="bi bi-image"></i><span>Image unavailable</span></div>{% endif %}
+        </div>{% endwith %}
+    </div>
+    <div class="col-lg-6">
+        {% if product.brand %}<p class="eyebrow">{{ product.brand.name }}</p>{% endif %}
+        <h1>{{ product.name }}</h1>
+        {% if product.short_description %}<p class="text-secondary">{{ product.short_description }}</p>{% endif %}
+        <span class="badge text-bg-light">{{ product.get_condition_display }}</span>
+        <div class="variant-prices my-4">{% for variant in variants %}<p class="mb-1">৳ {{ variant.selling_price|floatformat:2 }}{% if variant.compare_at_price > variant.selling_price %} <del class="text-secondary">৳ {{ variant.compare_at_price|floatformat:2 }}</del>{% endif %} <small class="text-secondary">{{ variant.variant_name }}</small></p>{% endfor %}</div>
+        {% if default_variant and default_variant.inventory.available_quantity > 0 %}
+        <p class="stock-status text-success"><i class="bi bi-check-circle"></i> In stock — {{ default_variant.inventory.available_quantity }} available</p>
+        {% else %}<p class="stock-status text-danger">Out of stock</p>{% endif %}
+        <form action="{% url 'cart:add' %}" method="post" class="purchase-form">
+            {% csrf_token %}
+            <label class="form-label" for="variant-select">Option</label>
+            <select class="form-select mb-3" id="variant-select" name="variant" required>
+                {% for variant in variants %}<option value="{{ variant.pk }}" {% if variant.pk == default_variant.pk %}selected{% endif %} {% if variant.inventory.available_quantity < 1 %}disabled{% endif %}>{{ variant.variant_name }} · ৳ {{ variant.selling_price|floatformat:2 }}{% if variant.inventory.available_quantity < 1 %} · Out of stock{% endif %}</option>{% endfor %}
+            </select>
+            <label class="form-label" for="product-quantity">Quantity</label>
+            <input class="form-control quantity-input mb-3" id="product-quantity" type="number" name="quantity" min="1" max="20" value="1" required>
+            <button class="btn btn-primary btn-lg" type="submit" {% if not default_variant or default_variant.inventory.available_quantity < 1 %}disabled{% endif %}>Add to cart</button>
+        </form>
+        {% if user.is_authenticated and default_variant %}<form class="mt-2" action="{% url 'accounts:wishlist_add' default_variant.pk %}" method="post">{% csrf_token %}<button class="btn btn-outline-primary" type="submit"><i class="bi bi-heart"></i> Save to wishlist</button></form>{% elif not user.is_authenticated %}<a class="btn btn-outline-primary mt-2" href="{% url 'accounts:login' %}">Sign in to save to wishlist</a>{% endif %}
+        <div class="product-detail__description mt-5"><h2 class="h4">Product information</h2><div>{{ product.description|linebreaks }}</div></div>
+        {% if default_variant.attribute_values.all %}
+        <h2 class="h4 mt-4">Specifications</h2>
+        <dl class="spec-list">{% for specification in default_variant.attribute_values.all %}<div><dt>{{ specification.attribute.name }}</dt><dd>{% if specification.value %}{{ specification.value.value }}{% else %}{{ specification.custom_value }}{% endif %} {{ specification.attribute.unit }}</dd></div>{% endfor %}</dl>
+        {% endif %}
+    </div>
+</div>
+<section class="content-section">
+    <div class="section-heading"><div><span class="eyebrow">Customer feedback</span><h2>Reviews</h2></div></div>
+    {% for review in reviews %}<article class="review-card"><div class="review-stars" aria-label="{{ review.rating }} out of 5 stars">{% for _ in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</div><h3>{{ review.title }}</h3><p>{{ review.comment|linebreaksbr }}</p><small class="text-secondary">{% if review.user %}{{ review.user.username }}{% else %}Customer{% endif %}</small></article>{% empty %}<p class="text-secondary">No approved reviews yet.</p>{% endfor %}
+    <form class="review-form mt-4" action="{% url 'reviews:submit' product.slug %}" method="post">
+        {% csrf_token %}<h3 class="h5">Write a review</h3>
+        <label class="form-label" for="review-rating">Rating</label><select class="form-select mb-2" id="review-rating" name="rating">{% for rating in "54321" %}<option value="{{ rating }}">{{ rating }} / 5</option>{% endfor %}</select>
+        <label class="form-label" for="review-title">Title</label><input class="form-control mb-2" id="review-title" name="title" maxlength="180">
+        <label class="form-label" for="review-comment">Review</label><textarea class="form-control mb-2" id="review-comment" name="comment" rows="4"></textarea>
+        <button class="btn btn-outline-primary" type="submit">Submit for review</button>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Dashboard | Mr. Computers{% endblock %}
+{% block dashboard_content %}
+<div class="dashboard-page-heading"><div><h1>Dashboard</h1><p>Overview of your store, sales and activities</p></div><div class="dashboard-date-chip"><i class="bi bi-calendar3"></i> {{ report.chart_days.0.label }} – {% now "M j, Y" %}</div></div>
+
+<section class="dashboard-kpis" aria-label="Store performance">
+    <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-blue"><i class="bi bi-currency-dollar"></i></span><div><small>Total sales this month</small><strong>৳ {{ report.month_sales|floatformat:2 }}</strong><span class="dashboard-kpi__caption">Paid, delivered orders</span></div></article>
+    <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-green"><i class="bi bi-bag-check"></i></span><div><small>Total orders</small><strong>{{ report.new_orders }}</strong><span class="dashboard-kpi__caption">Received today</span></div></article>
+    <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-sky"><i class="bi bi-people"></i></span><div><small>Total customers</small><strong>{{ report.customers_count }}</strong><span class="dashboard-kpi__caption">Registered accounts</span></div></article>
+    <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-mint"><i class="bi bi-box-seam"></i></span><div><small>Products in stock</small><strong>{{ report.in_stock_products }}</strong><span class="dashboard-kpi__caption">{{ report.out_of_stock_count }} variants out of stock</span></div></article>
+</section>
+
+<section class="dashboard-primary-grid">
+    <article class="dashboard-panel sales-panel">
+        <div class="dashboard-panel__heading"><div><h2>Sales overview</h2><p>Confirmed revenue over the last 30 days</p></div><span class="chart-legend"><i></i> Paid sales</span></div>
+        <div class="sales-chart" role="img" aria-label="Daily paid sales over the last 30 days, with a maximum of ৳ {{ report.chart_max|floatformat:0 }}">
+            <div class="sales-chart__axis"><span>৳ {{ report.chart_max|floatformat:0 }}</span><span>৳ 0</span></div><div class="sales-chart__bars">{% for day in report.chart_days %}<div class="sales-chart__bar-wrap" title="{{ day.label }}: ৳ {{ day.sales|floatformat:2 }}"><span class="sales-chart__bar" style="height:{{ day.height }}%"></span><small>{{ day.label }}</small></div>{% endfor %}</div>
+        </div>
+    </article>
+    <article class="dashboard-panel status-panel">
+        <div class="dashboard-panel__heading"><div><h2>Order status</h2><p>{{ report.status_total }} total orders</p></div></div>
+        <div class="status-chart" style="--status-chart:{{ report.status_chart }}" aria-hidden="true"><span>{{ report.status_total }}</span><small>Total orders</small></div>
+        <ul class="status-legend">{% for status in report.status_counts %}<li><span class="status-dot status-dot--{{ status.key }}"></span>{{ status.label }} <strong>{{ status.count }}</strong></li>{% empty %}<li class="text-secondary">Order status will appear when orders arrive.</li>{% endfor %}</ul>
+    </article>
+</section>
+
+<section class="dashboard-lists-grid">
+    <article class="dashboard-panel">
+        <div class="dashboard-panel__heading"><h2>Top selling products</h2><a href="{% url 'dashboard:products' %}">View all</a></div>
+        <div class="dashboard-product-list">
+            {% for product in report.top_products %}<div class="dashboard-product-row"><span class="dashboard-product-thumb"><i class="bi bi-box-seam"></i></span><span class="dashboard-product-row__name"><strong>{{ product.product_name_snapshot }}</strong><small>{{ product.orders }} order{{ product.orders|pluralize }}</small></span><strong class="dashboard-product-row__value">{{ product.units }} sold</strong></div>
+            {% empty %}{% for product in report.demo_products %}<div class="dashboard-product-row"><span class="dashboard-product-thumb"><i class="bi {{ product.icon }}"></i></span><span class="dashboard-product-row__name"><strong>{{ product.name }}</strong><small>Sample catalog preview</small></span><span class="demo-label">Demo</span></div>{% empty %}<p class="dashboard-empty">Product sales will appear here as orders are completed.</p>{% endfor %}{% endfor %}
+        </div>
+    </article>
+    <article class="dashboard-panel">
+        <div class="dashboard-panel__heading"><h2>Recent orders</h2><a href="{% url 'dashboard:orders' %}">View all</a></div>
+        <div class="table-responsive"><table class="table dashboard-compact-table"><thead><tr><th>Order #</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody>{% for order in report.recent_orders %}<tr><td><a href="{% url 'dashboard:order_detail' order.pk %}">#{{ order.order_number }}</a></td><td>{{ order.customer_name }}</td><td>৳ {{ order.total_amount|floatformat:0 }}</td><td><span class="status-pill">{{ order.get_order_status_display }}</span></td></tr>{% empty %}<tr><td colspan="4" class="dashboard-empty">New orders will appear here.</td></tr>{% endfor %}</tbody></table></div>
+    </article>
+    <article class="dashboard-panel">
+        <div class="dashboard-panel__heading"><h2>Low stock alert</h2><a href="{% url 'dashboard:inventory' %}">View all</a></div>
+        <div class="dashboard-product-list">{% for inventory in report.low_stock_rows %}<div class="dashboard-product-row"><span class="dashboard-product-thumb"><i class="bi bi-box"></i></span><span class="dashboard-product-row__name"><strong>{{ inventory.variant.product.name }}</strong><small>{{ inventory.variant.sku }}</small></span><strong class="stock-count">{{ inventory.available_quantity }}</strong></div>{% empty %}<p class="dashboard-empty">No products below their reorder level.</p>{% endfor %}</div>
+    </article>
+</section>
+
+<section class="dashboard-panel quick-actions-panel">
+    <div class="dashboard-panel__heading"><h2>Quick actions</h2></div>
+    <div class="dashboard-quick-actions"><a href="{% url 'dashboard:product_create' %}" class="quick-action quick-action--blue"><i class="bi bi-plus-circle"></i> Add product</a><a href="{% url 'dashboard:orders' %}" class="quick-action quick-action--violet"><i class="bi bi-cart-check"></i> Manage orders</a><a href="{% url 'dashboard:coupons' %}" class="quick-action quick-action--green"><i class="bi bi-ticket-perforated"></i> Manage coupons</a><a href="{% url 'dashboard:categories' %}" class="quick-action quick-action--orange"><i class="bi bi-tags"></i> Manage categories</a><a href="{% url 'dashboard:customers' %}" class="quick-action quick-action--teal"><i class="bi bi-people"></i> View customers</a></div>
+</section>
+
+<section class="dashboard-bottom-grid">
+    <article class="dashboard-panel">
+        <div class="dashboard-panel__heading"><h2>Recent activity</h2></div>
+        <ul class="activity-list">{% for event in report.recent_activity %}<li><span class="activity-icon"><i class="bi bi-lightning-charge"></i></span><span><strong>{{ event.action }}</strong><small>{{ event.model_name }} · {{ event.username }} · {{ event.created_at|timesince }} ago</small></span></li>{% empty %}<li class="dashboard-empty">Staff actions will appear here as your team works.</li>{% endfor %}</ul>
+    </article>
+    <article class="dashboard-panel">
+        <div class="dashboard-panel__heading"><h2>System configuration</h2><a href="{% url 'dashboard:settings' %}">Settings</a></div>
+        <ul class="system-list"><li><span class="system-status system-status--blue"><i class="bi bi-database"></i></span><span><strong>Database</strong><small>PostgreSQL · {{ report.database_host }}</small></span><span class="system-value">Configured</span></li><li><span class="system-status system-status--green"><i class="bi bi-images"></i></span><span><strong>Media storage</strong><small>Product and banner uploads</small></span><span class="system-value">Ready</span></li><li><span class="system-status system-status--orange"><i class="bi bi-speedometer2"></i></span><span><strong>Rate limiting</strong><small>Request protection</small></span><span class="system-value">Enabled</span></li><li><span class="system-status system-status--green"><i class="bi bi-shield-check"></i></span><span><strong>Security</strong><small>Staff access controls</small></span><span class="system-value">Active</span></li></ul>
+    </article>
+</section>
+{% endblock %}

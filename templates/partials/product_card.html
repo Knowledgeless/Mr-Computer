@@ -1,0 +1,24 @@
+{% with variant=product.variants.all|first image=product.images.all|first %}
+<article class="product-card h-100">
+    <a class="product-card__image-wrap" href="{% url 'catalog:product_detail' product.slug %}">
+        {% if image %}<img class="product-card__image" src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" loading="lazy" width="480" height="480">
+        {% else %}<div class="image-placeholder" aria-label="Product image unavailable"><i class="bi bi-image"></i></div>{% endif %}
+        {% if product.condition == "REFURBISHED" %}<span class="product-badge">Refurbished</span>{% elif product.is_new_arrival %}<span class="product-badge">New</span>{% endif %}
+    </a>
+    <div class="product-card__body">
+        {% if product.brand %}<p class="product-brand">{{ product.brand.name }}</p>{% endif %}
+        <h3 class="product-card__title"><a href="{% url 'catalog:product_detail' product.slug %}">{{ product.name }}</a></h3>
+        {% if variant %}
+        <p class="product-price mb-3">৳ {{ variant.selling_price|floatformat:2 }}{% if variant.compare_at_price > variant.selling_price %}<del class="product-price__old">৳ {{ variant.compare_at_price|floatformat:2 }}</del>{% endif %}</p>
+        {% else %}<p class="text-secondary mb-3">Price unavailable</p>{% endif %}
+        {% if variant and variant.inventory.available_quantity > 0 %}
+        <form action="{% url 'cart:add' %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="variant" value="{{ variant.pk }}">
+            <input type="hidden" name="quantity" value="1">
+            <button class="btn btn-primary w-100" type="submit">Add to cart</button>
+        </form>
+        {% else %}<a class="btn btn-outline-secondary w-100" href="{% url 'catalog:product_detail' product.slug %}">View product</a>{% endif %}
+    </div>
+</article>
+{% endwith %}
