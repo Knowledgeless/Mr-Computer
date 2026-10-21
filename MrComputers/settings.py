@@ -2,6 +2,8 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 
 # =============================================================================
 # BASE DIRECTORY
@@ -13,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # =============================================================================
 # ENVIRONMENT HELPERS
 # =============================================================================
-
+load_dotenv(BASE_DIR / ".env")
 def env_bool(name, default=False):
     value = os.environ.get(name)
 

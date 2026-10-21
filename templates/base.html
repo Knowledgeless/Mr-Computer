@@ -36,7 +36,13 @@
                             <button class="btn btn-link" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
                         </form>
                         <a class="header-action" href="{% url 'cart:detail' %}"><i class="bi bi-cart3"></i><span>Cart</span></a>
-                        <a class="header-action" href="{% url 'accounts:overview' %}"><i class="bi bi-person-circle"></i><span>Login / Sign up</span></a>
+                        {% if user.is_authenticated %}
+                        <a class="header-action" href="{% url 'accounts:overview' %}"><i class="bi bi-person-circle"></i><span>My account</span></a>
+                        <form class="header-signout" action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}<button class="header-action" type="submit"><i class="bi bi-box-arrow-right"></i><span>Sign out</span></button></form>
+                        {% else %}
+                        <a class="header-action" href="{% url 'accounts:login' %}"><i class="bi bi-person-circle"></i><span>Login</span></a>
+                        <a class="header-action" href="{% url 'accounts:register' %}"><i class="bi bi-person-plus"></i><span>Sign up</span></a>
+                        {% endif %}
                     </div>
                 </div>
             </nav>
@@ -55,16 +61,18 @@
         </nav>
     </header>
     {% endblock %}
-    {% block site_messages %}{% if messages %}
-    <div class="container pt-3" aria-live="polite">
-        {% for message in messages %}
-        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="status">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
+    {% block site_messages %}
+    <div class="toast-region" data-toast-region aria-live="polite" aria-relevant="additions">
+        {% if messages %}{% for message in messages %}
+        <div class="app-toast" data-toast data-toast-type="{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'success' in message.tags %}success{% else %}info{% endif %}" role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}">
+            <span class="app-toast__icon" aria-hidden="true"><i class="bi {% if 'error' in message.tags %}bi-x-circle-fill{% elif 'warning' in message.tags %}bi-exclamation-triangle-fill{% elif 'success' in message.tags %}bi-check-circle-fill{% else %}bi-info-circle-fill{% endif %}"></i></span>
+            <span class="app-toast__message">{{ message }}</span>
+            <button class="app-toast__close" type="button" data-toast-close aria-label="Dismiss notification"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+            <span class="app-toast__progress" aria-hidden="true"></span>
         </div>
-        {% endfor %}
+        {% endfor %}{% endif %}
     </div>
-    {% endif %}{% endblock %}
+    {% endblock %}
     <main id="main-content" class="{% block main_class %}container py-4 py-lg-5{% endblock %}">
         {% block content %}{% endblock %}
     </main>
@@ -90,8 +98,12 @@
                 </div>
                 <div class="col-6 col-lg-2">
                     <h2 class="footer-heading">Account</h2>
+                    {% if not user.is_authenticated %}
                     <a href="{% url 'accounts:login' %}">Sign in</a>
                     <a href="{% url 'accounts:register' %}">Create account</a>
+                    {% else %}
+                    <a href="{% url 'accounts:overview' %}">My account</a>
+                    {% endif %}
                     <a href="{% url 'accounts:wishlist' %}">Wishlist</a>
                 </div>
                 <div class="col-6 col-lg-2">

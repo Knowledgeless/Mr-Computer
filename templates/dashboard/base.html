@@ -3,7 +3,6 @@
 {% block body_class %}dashboard-body{% endblock %}
 {% block site_header %}{% endblock %}
 {% block site_footer %}{% endblock %}
-{% block site_messages %}{% endblock %}
 {% block main_class %}dashboard-main{% endblock %}
 {% block content %}
 <div class="dashboard-app">
@@ -32,7 +31,6 @@
             <div class="dashboard-topbar__title"><span>Dashboard</span><small>Store management</small></div>
             <div class="dashboard-topbar__actions"><a href="{% url 'dashboard:orders' %}" aria-label="Orders"><i class="bi bi-bell"></i></a><span class="dashboard-avatar">{{ request.user.username|first|upper }}</span><span class="dashboard-user"><strong>{{ request.user.username }}</strong><small>Store Owner</small></span><a href="{% url 'catalog:home' %}" aria-label="Open store"><i class="bi bi-box-arrow-up-right"></i></a></div>
         </header>
-        {% if messages %}<div class="dashboard-messages" aria-live="polite">{% for message in messages %}<div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags|default:'info' }}{% endif %} alert-dismissible fade show" role="status">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button></div>{% endfor %}</div>{% endif %}
         <section class="dashboard-content">{% block dashboard_content %}{% endblock %}</section>
     </div>
 </div>

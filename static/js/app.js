@@ -5,6 +5,79 @@
         .split("; ")
         .find((entry) => entry.startsWith("csrftoken="));
 
+    const toastTypes = {
+        success: { icon: "bi-check-circle-fill" },
+        info: { icon: "bi-info-circle-fill" },
+        warning: { icon: "bi-exclamation-triangle-fill" },
+        error: { icon: "bi-x-circle-fill" },
+    };
+
+    const dismissToast = (toast) => {
+        if (toast.dataset.dismissed === "true") return;
+        toast.dataset.dismissed = "true";
+        toast.classList.add("is-leaving");
+        window.setTimeout(() => toast.remove(), 200);
+    };
+
+    const startToast = (toast) => {
+        const closeButton = toast.querySelector("[data-toast-close]");
+        const duration = Number(toast.dataset.toastDuration) || 4000;
+        if (closeButton) {
+            closeButton.addEventListener("click", () => dismissToast(toast), { once: true });
+        }
+        window.setTimeout(() => dismissToast(toast), duration);
+    };
+
+    const getToastRegion = () => {
+        let region = document.querySelector("[data-toast-region]");
+        if (!region) {
+            region = document.createElement("div");
+            region.className = "toast-region";
+            region.dataset.toastRegion = "";
+            region.setAttribute("aria-live", "polite");
+            region.setAttribute("aria-relevant", "additions");
+            document.body.append(region);
+        }
+        return region;
+    };
+
+    const showToast = (message, type = "info") => {
+        const normalizedType = Object.hasOwn(toastTypes, type) ? type : "info";
+        const toast = document.createElement("div");
+        const icon = document.createElement("span");
+        const iconElement = document.createElement("i");
+        const messageElement = document.createElement("span");
+        const closeButton = document.createElement("button");
+        const closeIcon = document.createElement("i");
+        const progress = document.createElement("span");
+
+        toast.className = "app-toast";
+        toast.dataset.toast = "";
+        toast.dataset.toastType = normalizedType;
+        toast.setAttribute("role", normalizedType === "error" ? "alert" : "status");
+        icon.className = "app-toast__icon";
+        icon.setAttribute("aria-hidden", "true");
+        iconElement.className = `bi ${toastTypes[normalizedType].icon}`;
+        icon.append(iconElement);
+        messageElement.className = "app-toast__message";
+        messageElement.textContent = String(message);
+        closeButton.className = "app-toast__close";
+        closeButton.type = "button";
+        closeButton.dataset.toastClose = "";
+        closeButton.setAttribute("aria-label", "Dismiss notification");
+        closeIcon.className = "bi bi-x-lg";
+        closeIcon.setAttribute("aria-hidden", "true");
+        closeButton.append(closeIcon);
+        progress.className = "app-toast__progress";
+        progress.setAttribute("aria-hidden", "true");
+        toast.append(icon, messageElement, closeButton, progress);
+        getToastRegion().append(toast);
+        startToast(toast);
+    };
+
+    document.querySelectorAll("[data-toast]").forEach(startToast);
+    window.MrComputers = { ...window.MrComputers, showToast };
+
     document.querySelectorAll("[data-coupon-form]").forEach((form) => {
         form.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -25,11 +98,15 @@
                     credentials: "same-origin",
                 });
                 const payload = await response.json();
-                result.textContent = response.ok ? payload.message : payload.error || "The coupon could not be applied.";
+                const message = response.ok ? payload.message : payload.error || "The coupon could not be applied.";
+                result.textContent = message;
                 result.className = response.ok ? "small mt-2 text-success" : "small mt-2 text-danger";
+                showToast(message, response.ok ? "success" : "error");
             } catch {
-                result.textContent = "We couldn't check that coupon. Please try again.";
+                const message = "We couldn't check that coupon. Please try again.";
+                result.textContent = message;
                 result.className = "small mt-2 text-danger";
+                showToast(message, "error");
             } finally {
                 button.disabled = false;
                 button.textContent = originalText;
