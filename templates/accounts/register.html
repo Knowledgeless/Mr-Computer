@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Create account | Mr. Computers{% endblock %}
 {% block content %}
-<div class="auth-card"><span class="eyebrow">Optional customer account</span><h1>Create your account</h1>
-<form method="post">{% csrf_token %}{% for field in form %}<div class="form-field mb-3">{{ field.label_tag }}{{ field }}{{ field.errors }}{% if field.help_text %}<div class="form-text">{{ field.help_text|linebreaksbr }}</div>{% endif %}</div>{% endfor %}<button class="btn btn-primary w-100" type="submit">Create account</button></form><p class="text-center mt-3 mb-0">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a>.</p></div>
+    <div class="auth-card"><span class="eyebrow">Optional customer account</span><h1>Create your account</h1>
+        <form method="post">{% csrf_token %}{% for field in form %}<div class="form-field mb-3">{{ field.label_tag }}{{ field }}{{ field.errors }}{% if field.help_text %}<div class="form-text">{{ field.help_text|linebreaksbr }}</div>{% endif %}</div>{% endfor %}<button class="btn btn-primary w-100" type="submit">Create account</button></form><p class="text-center mt-3 mb-0">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a>.</p></div>
 {% endblock %}

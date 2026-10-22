@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}My orders | Mr. Computers{% endblock %}
-{% block content %}<div class="page-heading"><div><span class="eyebrow">Account</span><h1>My orders</h1></div><a href="{% url 'accounts:overview' %}">Account overview</a></div>
-{% for order in orders %}<div class="summary-card mb-3"><div class="d-flex flex-wrap justify-content-between gap-2"><div><strong>{{ order.order_number }}</strong><p class="small text-secondary mb-1">{{ order.created_at|date:"M j, Y" }} · {{ order.get_order_status_display }}</p></div><strong>৳ {{ order.total_amount|floatformat:2 }}</strong><a href="{% url 'accounts:order_detail' order.order_number %}">Details</a></div></div>{% empty %}<div class="empty-state"><h2>No orders yet</h2><a class="btn btn-primary" href="{% url 'catalog:product_list' %}">Browse products</a></div>{% endfor %}
+{% block content %}
+    <div class="page-heading"><div><span class="eyebrow">Account</span><h1>My orders</h1></div><a href="{% url 'accounts:overview' %}">Account overview</a></div>
+    {% for order in orders %}<div class="summary-card mb-3"><div class="d-flex flex-wrap justify-content-between gap-2"><div><strong>{{ order.order_number }}</strong><p class="small text-secondary mb-1">{{ order.created_at|date:"M j, Y" }} · {{ order.get_order_status_display }}</p></div><strong>৳ {{ order.total_amount|floatformat:2 }}</strong><a href="{% url 'accounts:order_detail' order.order_number %}">Details</a></div></div>{% empty %}<div class="empty-state"><h2>No orders yet</h2><a class="btn btn-primary" href="{% url 'catalog:product_list' %}">Browse products</a></div>{% endfor %}
 {% endblock %}

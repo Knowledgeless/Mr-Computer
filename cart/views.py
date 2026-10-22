@@ -36,7 +36,7 @@ def add(request):
     except ValidationError as error:
         messages.error(request, error.messages[0])
     else:
-        messages.success(request, "Added to your cart.")
+        messages.success(request, "Added to your cart..!")
     return redirect("cart:detail")
 
 
@@ -61,5 +61,5 @@ def update(request, item_id):
 def remove(request, item_id):
     cart = get_cart_for_request(request)
     CartItem.objects.filter(pk=item_id, cart=cart).delete()
-    messages.success(request, "Removed from your cart.")
+    messages.warning(request, "Removed from your cart..!")
     return redirect("cart:detail")

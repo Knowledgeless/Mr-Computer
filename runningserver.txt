@@ -1,0 +1,4 @@
+sudo pg_ctlcluster 18 main start
+pg_lsclusters
+python3 manage.py migrate
+python3 manage.py runserver

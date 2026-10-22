@@ -1,13 +1,22 @@
 {% extends "base.html" %}
 {% block title %}My account | Mr. Computers{% endblock %}
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">Your account</span><h1>Hello, {{ request.user.first_name|default:request.user.username }}</h1><p class="text-secondary">Your orders and account details, all in one place.</p></div><form action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}<button class="btn btn-outline-secondary" type="submit">Sign out</button></form></div>
-<div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:orders' %}"><i class="bi bi-box-seam"></i><span>My orders</span></a></div>
-    <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:profile' %}"><i class="bi bi-person"></i><span>Profile</span></a></div>
-    <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:addresses' %}"><i class="bi bi-geo-alt"></i><span>Addresses</span></a></div>
-    <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:wishlist' %}"><i class="bi bi-heart"></i><span>Wishlist</span></a></div>
-</div>
-<h2 class="h4 mb-3">Recent orders</h2>
-{% for order in orders %}<div class="summary-card mb-2 d-flex flex-wrap justify-content-between align-items-center"><div><strong>{{ order.order_number }}</strong><small class="d-block text-secondary">{{ order.created_at|date:"M j, Y" }} · {{ order.get_order_status_display }}</small></div><strong>৳ {{ order.total_amount|floatformat:2 }}</strong><a href="{% url 'accounts:order_detail' order.order_number %}">View</a></div>{% empty %}<div class="empty-state"><h2>No orders yet</h2><p>Your orders will appear here after checkout.</p><a class="btn btn-primary" href="{% url 'catalog:product_list' %}">Shop products</a></div>{% endfor %}
+    <div class="page-heading">
+        <div>
+            <span class="eyebrow">Your account</span>
+            <h1>Welcome Back, {{ request.user.first_name|default:request.user.username }} . . !</h1>
+            <p class="text-secondary">Your orders and account details, all in one place.</p>
+        </div>
+
+    {% comment %} <form action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}   <button class="btn btn-outline-secondary" type="submit">Sign out</button></form> {% endcomment %}
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:orders' %}"><i class="bi bi-box-seam"></i><span>My orders</span></a></div>
+        <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:profile' %}"><i class="bi bi-person"></i><span>Profile</span></a></div>
+        <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:addresses' %}"><i class="bi bi-geo-alt"></i><span>Addresses</span></a></div>
+        <div class="col-6 col-lg-3"><a class="category-tile" href="{% url 'accounts:wishlist' %}"><i class="bi bi-heart"></i><span>Wishlist</span></a></div>
+    </div>
+    <h2 class="h4 mb-3">Recent orders</h2>
+    {% for order in orders %}<div class="summary-card mb-2 d-flex flex-wrap justify-content-between align-items-center"><div><strong>{{ order.order_number }}</strong><small class="d-block text-secondary">{{ order.created_at|date:"M j, Y" }} · {{ order.get_order_status_display }}</small></div><strong>৳ {{ order.total_amount|floatformat:2 }}</strong><a href="{% url 'accounts:order_detail' order.order_number %}">View</a></div>{% empty %}<div class="empty-state"><h2>No orders yet</h2><p>Your orders will appear here after checkout.</p><a class="btn btn-primary" href="{% url 'catalog:product_list' %}">Shop products</a></div>{% endfor %}
 {% endblock %}

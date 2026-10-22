@@ -5,33 +5,33 @@
 {% block site_footer %}{% endblock %}
 {% block main_class %}dashboard-main{% endblock %}
 {% block content %}
-<div class="dashboard-app">
-    <aside class="dashboard-sidebar" id="dashboard-sidebar">
-        <a class="dashboard-brand" href="{% url 'dashboard:overview' %}"><span class="dashboard-brand__icon"><i class="bi bi-cpu-fill"></i></span><span><strong>Mr. Computers</strong><small>Store Owner</small></span></a>
-        <nav aria-label="Dashboard navigation">
-            <span class="dashboard-nav-label">WORKSPACE</span>
-            <a class="{% if request.resolver_match.url_name == 'overview' %}active{% endif %}" href="{% url 'dashboard:overview' %}"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
-            <details class="dashboard-nav-group" {% if 'product' in request.resolver_match.url_name or 'categor' in request.resolver_match.url_name or 'brand' in request.resolver_match.url_name %}open{% endif %}><summary><i class="bi bi-box-seam"></i><span>Products</span><i class="bi bi-chevron-down ms-auto"></i></summary><a href="{% url 'dashboard:products' %}">All Products</a><a href="{% url 'dashboard:product_create' %}">Add Product</a><a href="{% url 'dashboard:categories' %}">Categories</a><a href="{% url 'dashboard:brands' %}">Brands</a></details>
-            <a class="{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order_detail' %}active{% endif %}" href="{% url 'dashboard:orders' %}"><i class="bi bi-receipt"></i><span>Orders</span></a>
-            <a class="{% if request.resolver_match.url_name == 'customers' %}active{% endif %}" href="{% url 'dashboard:customers' %}"><i class="bi bi-people"></i><span>Customers</span></a>
-            <a class="{% if request.resolver_match.url_name == 'coupons' %}active{% endif %}" href="{% url 'dashboard:coupons' %}"><i class="bi bi-ticket-perforated"></i><span>Coupons</span></a>
-            <a class="{% if request.resolver_match.url_name == 'inventory' or request.resolver_match.url_name == 'stock_history' %}active{% endif %}" href="{% url 'dashboard:inventory' %}"><i class="bi bi-boxes"></i><span>Inventory</span><i class="dashboard-sidebar__chevron bi bi-chevron-down"></i></a>
-            <a class="{% if request.resolver_match.url_name == 'media' %}active{% endif %}" href="{% url 'dashboard:media' %}"><i class="bi bi-images"></i><span>Media</span></a>
-            <a class="{% if request.resolver_match.url_name == 'content' or request.resolver_match.url_name == 'settings' %}active{% endif %}" href="{% url 'dashboard:content' %}"><i class="bi bi-window-stack"></i><span>Marketing & Offers</span><i class="dashboard-sidebar__chevron bi bi-chevron-down"></i></a>
-            <a class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'dashboard:reports' %}"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
-            <span class="dashboard-nav-label dashboard-nav-label--lower">PREFERENCES</span>
-            <a href="{% url 'dashboard:settings' %}"><i class="bi bi-gear"></i><span>Settings</span></a>
-            <a href="{% url 'catalog:home' %}"><i class="bi bi-shop"></i><span>View store</span></a>
-        </nav>
-        <div class="dashboard-sidebar__status"><span></span>Dashboard workspace</div>
-    </aside>
-    <div class="dashboard-main-content">
-        <header class="dashboard-topbar">
-            <button class="dashboard-menu-toggle" type="button" aria-label="Toggle dashboard navigation" aria-controls="dashboard-sidebar" aria-expanded="false" data-dashboard-menu><i class="bi bi-list"></i></button>
-            <div class="dashboard-topbar__title"><span>Dashboard</span><small>Store management</small></div>
-            <div class="dashboard-topbar__actions"><a href="{% url 'dashboard:orders' %}" aria-label="Orders"><i class="bi bi-bell"></i></a><span class="dashboard-avatar">{{ request.user.username|first|upper }}</span><span class="dashboard-user"><strong>{{ request.user.username }}</strong><small>Store Owner</small></span><a href="{% url 'catalog:home' %}" aria-label="Open store"><i class="bi bi-box-arrow-up-right"></i></a></div>
-        </header>
-        <section class="dashboard-content">{% block dashboard_content %}{% endblock %}</section>
+    <div class="dashboard-app">
+        <aside class="dashboard-sidebar" id="dashboard-sidebar">
+            <a class="dashboard-brand" href="{% url 'dashboard:overview' %}"><span class="dashboard-brand__icon"><i class="bi bi-cpu-fill"></i></span><span><strong>Mr. Computers</strong><small>Store Owner</small></span></a>
+            <nav aria-label="Dashboard navigation">
+                <span class="dashboard-nav-label">WORKSPACE</span>
+                <a class="{% if request.resolver_match.url_name == 'overview' %}active{% endif %}" href="{% url 'dashboard:overview' %}"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+                <details class="dashboard-nav-group" {% if 'product' in request.resolver_match.url_name or 'categor' in request.resolver_match.url_name or 'brand' in request.resolver_match.url_name %}open{% endif %}><summary><i class="bi bi-box-seam"></i><span>Products</span><i class="bi bi-chevron-down ms-auto"></i></summary><a href="{% url 'dashboard:products' %}">All Products</a><a href="{% url 'dashboard:product_create' %}">Add Product</a><a href="{% url 'dashboard:categories' %}">Categories</a><a href="{% url 'dashboard:brands' %}">Brands</a></details>
+                <a class="{% if request.resolver_match.url_name == 'orders' or request.resolver_match.url_name == 'order_detail' %}active{% endif %}" href="{% url 'dashboard:orders' %}"><i class="bi bi-receipt"></i><span>Orders</span></a>
+                <a class="{% if request.resolver_match.url_name == 'customers' %}active{% endif %}" href="{% url 'dashboard:customers' %}"><i class="bi bi-people"></i><span>Customers</span></a>
+                <a class="{% if request.resolver_match.url_name == 'coupons' %}active{% endif %}" href="{% url 'dashboard:coupons' %}"><i class="bi bi-ticket-perforated"></i><span>Coupons</span></a>
+                <a class="{% if request.resolver_match.url_name == 'inventory' or request.resolver_match.url_name == 'stock_history' %}active{% endif %}" href="{% url 'dashboard:inventory' %}"><i class="bi bi-boxes"></i><span>Inventory</span><i class="dashboard-sidebar__chevron bi bi-chevron-down"></i></a>
+                <a class="{% if request.resolver_match.url_name == 'media' %}active{% endif %}" href="{% url 'dashboard:media' %}"><i class="bi bi-images"></i><span>Media</span></a>
+                <a class="{% if request.resolver_match.url_name == 'content' or request.resolver_match.url_name == 'settings' %}active{% endif %}" href="{% url 'dashboard:content' %}"><i class="bi bi-window-stack"></i><span>Marketing & Offers</span><i class="dashboard-sidebar__chevron bi bi-chevron-down"></i></a>
+                <a class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'dashboard:reports' %}"><i class="bi bi-bar-chart"></i><span>Reports</span></a>
+                <span class="dashboard-nav-label dashboard-nav-label--lower">PREFERENCES</span>
+                <a href="{% url 'dashboard:settings' %}"><i class="bi bi-gear"></i><span>Settings</span></a>
+                <a href="{% url 'catalog:home' %}"><i class="bi bi-shop"></i><span>View store</span></a>
+            </nav>
+            <div class="dashboard-sidebar__status"><span></span>Dashboard workspace</div>
+        </aside>
+        <div class="dashboard-main-content">
+            <header class="dashboard-topbar">
+                <button class="dashboard-menu-toggle" type="button" aria-label="Toggle dashboard navigation" aria-controls="dashboard-sidebar" aria-expanded="false" data-dashboard-menu><i class="bi bi-list"></i></button>
+                <div class="dashboard-topbar__title"><span>Dashboard</span><small>Store management</small></div>
+                <div class="dashboard-topbar__actions"><a href="{% url 'dashboard:orders' %}" aria-label="Orders"><i class="bi bi-bell"></i></a><span class="dashboard-avatar">{{ request.user.username|first|upper }}</span><span class="dashboard-user"><strong>{{ request.user.username }}</strong><small>Store Owner</small></span><a href="{% url 'catalog:home' %}" aria-label="Open store"><i class="bi bi-box-arrow-up-right"></i></a></div>
+            </header>
+            <section class="dashboard-content">{% block dashboard_content %}{% endblock %}</section>
+        </div>
     </div>
-</div>
 {% endblock %}

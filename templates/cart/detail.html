@@ -1,43 +1,43 @@
 {% extends "base.html" %}
 {% block title %}Your Cart | Mr. Computers{% endblock %}
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">Ready when you are</span><h1>Your cart</h1></div></div>
-{% if items %}
-<div class="row g-4">
-    <div class="col-lg-8">
-        <div class="cart-items">
-        {% for item in items %}
-        <article class="cart-line">
-            {% with image=item.variant.product.images.all|first %}
-            <a class="cart-line__image" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{% if image %}<img src="{{ image.image.url }}" alt="{{ image.alt_text|default:item.variant.product.name }}" width="120" height="120" loading="lazy">{% else %}<span class="image-placeholder"><i class="bi bi-image"></i></span>{% endif %}</a>
-            {% endwith %}
-            <div class="cart-line__info"><a class="fw-semibold" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{{ item.variant.product.name }}</a><small class="text-secondary d-block">{{ item.variant.variant_name }} · {{ item.variant.sku }}</small><strong class="d-block mt-2">৳ {{ item.variant.selling_price|floatformat:2 }}</strong></div>
-            <form class="cart-line__quantity" action="{% url 'cart:update' item.pk %}" method="post">{% csrf_token %}<label class="visually-hidden" for="qty-{{ item.pk }}">Quantity</label><input class="form-control" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="20" value="{{ item.quantity }}"><button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Update</button></form>
-            <div class="cart-line__total"><strong>৳ {{ item.line_total|floatformat:2 }}</strong><form action="{% url 'cart:remove' item.pk %}" method="post">{% csrf_token %}<button class="btn btn-link text-danger p-0 mt-2" type="submit">Remove</button></form></div>
-        </article>
-        {% endfor %}
+    <div class="page-heading"><div><span class="eyebrow">Ready when you are</span><h1>Your cart</h1></div></div>
+    {% if items %}
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="cart-items">
+                    {% for item in items %}
+                        <article class="cart-line">
+                            {% with image=item.variant.product.images.all|first %}
+                                <a class="cart-line__image" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{% if image %}<img src="{{ image.image.url }}" alt="{{ image.alt_text|default:item.variant.product.name }}" width="120" height="120" loading="lazy">{% else %}<span class="image-placeholder"><i class="bi bi-image"></i></span>{% endif %}</a>
+                            {% endwith %}
+                            <div class="cart-line__info"><a class="fw-semibold" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{{ item.variant.product.name }}</a><small class="text-secondary d-block">{{ item.variant.variant_name }} · {{ item.variant.sku }}</small><strong class="d-block mt-2">৳ {{ item.variant.selling_price|floatformat:2 }}</strong></div>
+                            <form class="cart-line__quantity" action="{% url 'cart:update' item.pk %}" method="post">{% csrf_token %}<label class="visually-hidden" for="qty-{{ item.pk }}">Quantity</label><input class="form-control" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="20" value="{{ item.quantity }}"><button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Update</button></form>
+                            <div class="cart-line__total"><strong>৳ {{ item.line_total|floatformat:2 }}</strong><form action="{% url 'cart:remove' item.pk %}" method="post">{% csrf_token %}<button class="btn btn-link text-danger p-0 mt-2" type="submit">Remove</button></form></div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+            <aside class="col-lg-4">
+                <div class="summary-card">
+                    <h2 class="h4">Order summary</h2>
+                    <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2 }}</strong></div>
+                    <div class="summary-row"><span>Delivery</span><span>Calculated at checkout</span></div>
+                    <hr>
+                    <p class="small text-secondary">Prices and stock are verified again when your order is placed.</p>
+                    {% if user.is_authenticated %}
+                        <form class="coupon-form" action="{% url 'promotions:validate' %}" method="post" data-coupon-form>
+                            {% csrf_token %}<label class="form-label" for="coupon-code">Coupon code</label>
+                            <div class="input-group"><input class="form-control" id="coupon-code" name="code" value="{{ request.session.applied_coupon }}" maxlength="64"><button class="btn btn-outline-primary" type="submit">Apply</button></div>
+                            <div class="small mt-2" data-coupon-result aria-live="polite"></div>
+                        </form>
+                    {% else %}<p class="small">Coupons are for signed-in customers. <a href="{% url 'accounts:login' %}">Sign in</a> to use one.</p>{% endif %}
+                    <a class="btn btn-primary btn-lg w-100 mt-3" href="{% url 'orders:checkout' %}">Continue to checkout</a>
+                    <p class="small text-center text-secondary mt-3 mb-0"><i class="bi bi-shield-check"></i> Guest checkout is available. No account required.</p>
+                </div>
+            </aside>
         </div>
-    </div>
-    <aside class="col-lg-4">
-        <div class="summary-card">
-            <h2 class="h4">Order summary</h2>
-            <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2 }}</strong></div>
-            <div class="summary-row"><span>Delivery</span><span>Calculated at checkout</span></div>
-            <hr>
-            <p class="small text-secondary">Prices and stock are verified again when your order is placed.</p>
-            {% if user.is_authenticated %}
-            <form class="coupon-form" action="{% url 'promotions:validate' %}" method="post" data-coupon-form>
-                {% csrf_token %}<label class="form-label" for="coupon-code">Coupon code</label>
-                <div class="input-group"><input class="form-control" id="coupon-code" name="code" value="{{ request.session.applied_coupon }}" maxlength="64"><button class="btn btn-outline-primary" type="submit">Apply</button></div>
-                <div class="small mt-2" data-coupon-result aria-live="polite"></div>
-            </form>
-            {% else %}<p class="small">Coupons are for signed-in customers. <a href="{% url 'accounts:login' %}">Sign in</a> to use one.</p>{% endif %}
-            <a class="btn btn-primary btn-lg w-100 mt-3" href="{% url 'orders:checkout' %}">Continue to checkout</a>
-            <p class="small text-center text-secondary mt-3 mb-0"><i class="bi bi-shield-check"></i> Guest checkout is available. No account required.</p>
-        </div>
-    </aside>
-</div>
-{% else %}
-<div class="empty-state"><i class="bi bi-bag"></i><h2>Your cart is empty</h2><p>Explore our products and find the right setup.</p><a class="btn btn-primary" href="{% url 'catalog:product_list' %}">Browse products</a></div>
-{% endif %}
+    {% else %}
+        <div class="empty-state"><i class="bi bi-bag"></i><h2>Your cart is empty</h2><p>Explore our products and find the right setup.</p><a class="btn btn-primary" href="{% url 'catalog:product_list' %}">Browse products</a></div>
+    {% endif %}
 {% endblock %}

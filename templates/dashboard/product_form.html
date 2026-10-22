@@ -1,13 +1,13 @@
 {% extends "dashboard/base.html" %}
 {% block title %}{{ title }} | Dashboard{% endblock %}
 {% block dashboard_content %}
-<div class="page-heading"><div><span class="eyebrow">Catalog management</span><h1>{{ title }}</h1></div><a href="{% url 'dashboard:products' %}">Back to products</a></div>
-<form method="post" enctype="multipart/form-data" class="form-section">{% csrf_token %}
-    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-    <h2 class="h5 mb-3">Basic information</h2><div class="row g-3">
-    {% for field in form %}<div class="{% if field.name == 'description' or field.name == 'short_description' or field.name == 'meta_description' %}col-12{% else %}col-md-6{% endif %} form-field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}{{ field.errors }}</div>{% endfor %}
-    </div>
-    <div class="alert alert-info mt-4 mb-0"><strong>Image limit:</strong> product images must be strictly smaller than 150 KB. Use a JPEG, PNG or WebP image up to 8192 × 8192 pixels.</div>
-    <button class="btn btn-primary mt-4" type="submit">Save product</button>
-</form>
+    <div class="page-heading"><div><span class="eyebrow">Catalog management</span><h1>{{ title }}</h1></div><a href="{% url 'dashboard:products' %}">Back to products</a></div>
+    <form method="post" enctype="multipart/form-data" class="form-section">{% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <h2 class="h5 mb-3">Basic information</h2><div class="row g-3">
+            {% for field in form %}<div class="{% if field.name == 'description' or field.name == 'short_description' or field.name == 'meta_description' %}col-12{% else %}col-md-6{% endif %} form-field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}{{ field.errors }}</div>{% endfor %}
+        </div>
+        <div class="alert alert-info mt-4 mb-0"><strong>Image limit:</strong> product images must be strictly smaller than 150 KB. Use a JPEG, PNG or WebP image up to 8192 × 8192 pixels.</div>
+        <button class="btn btn-primary mt-4" type="submit">Save product</button>
+    </form>
 {% endblock %}

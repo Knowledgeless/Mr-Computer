@@ -1,26 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Checkout | Mr. Computers{% endblock %}
 {% block content %}
-<div class="page-heading"><div><span class="eyebrow">Secure checkout</span><h1>Delivery details</h1><p class="text-secondary">You can place an order as a guest. Payment is Cash on Delivery.</p></div></div>
-<form method="post" class="row g-4">
-    {% csrf_token %}
-    <div class="col-lg-7">
-        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
-        <section class="form-section"><h2 class="h4">Contact information</h2>
-            <div class="row g-3">{% for field in form %}{% if field.name == "customer_name" or field.name == "customer_email" or field.name == "customer_phone" %}<div class="col-md-6 form-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div>
-        </section>
-        <section class="form-section mt-4"><h2 class="h4">Delivery address</h2>
-            <div class="row g-3">{% for field in form %}{% if field.name == "address_line_1" or field.name == "address_line_2" or field.name == "city" or field.name == "area" or field.name == "postal_code" or field.name == "shipping_zone" %}<div class="{% if field.name == 'address_line_1' or field.name == 'address_line_2' %}col-12{% else %}col-md-6{% endif %} form-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div>
-        </section>
-        <section class="form-section mt-4"><h2 class="h4">Order note</h2><div class="form-field">{{ form.customer_note.label_tag }}{{ form.customer_note }}{{ form.customer_note.errors }}</div></section>
-    </div>
-    <aside class="col-lg-5"><div class="summary-card">
-        <h2 class="h4">Your items</h2>
-        {% for item in items %}<div class="summary-row"><span>{{ item.quantity }} × {{ item.variant.product.name }}</span><strong>৳ {{ item.variant.selling_price|floatformat:2 }}</strong></div>{% endfor %}
-        <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2 }}</strong></div>
-        <hr><p class="small text-secondary">Final product prices, coupon, available stock and delivery fee are confirmed by the server when you place the order.</p>
-        <div class="payment-option"><i class="bi bi-cash-coin"></i><span><strong>Cash on Delivery</strong><small>Pay when your order is delivered.</small></span></div>
-        <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">Place order</button>
-    </div></aside>
-</form>
+    <div class="page-heading"><div><span class="eyebrow">Secure checkout</span><h1>Delivery details</h1><p class="text-secondary">You can place an order as a guest. Payment is Cash on Delivery.</p></div></div>
+    <form method="post" class="row g-4">
+        {% csrf_token %}
+        <div class="col-lg-7">
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            <section class="form-section"><h2 class="h4">Contact information</h2>
+                <div class="row g-3">{% for field in form %}{% if field.name == "customer_name" or field.name == "customer_email" or field.name == "customer_phone" %}<div class="col-md-6 form-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div>
+            </section>
+            <section class="form-section mt-4"><h2 class="h4">Delivery address</h2>
+                <div class="row g-3">{% for field in form %}{% if field.name == "address_line_1" or field.name == "address_line_2" or field.name == "city" or field.name == "area" or field.name == "postal_code" or field.name == "shipping_zone" %}<div class="{% if field.name == 'address_line_1' or field.name == 'address_line_2' %}col-12{% else %}col-md-6{% endif %} form-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div>
+            </section>
+            <section class="form-section mt-4"><h2 class="h4">Order note</h2><div class="form-field">{{ form.customer_note.label_tag }}{{ form.customer_note }}{{ form.customer_note.errors }}</div></section>
+        </div>
+        <aside class="col-lg-5"><div class="summary-card">
+            <h2 class="h4">Your items</h2>
+            {% for item in items %}<div class="summary-row"><span>{{ item.quantity }} × {{ item.variant.product.name }}</span><strong>৳ {{ item.variant.selling_price|floatformat:2 }}</strong></div>{% endfor %}
+            <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2 }}</strong></div>
+            <hr><p class="small text-secondary">Final product prices, coupon, available stock and delivery fee are confirmed by the server when you place the order.</p>
+            <div class="payment-option"><i class="bi bi-cash-coin"></i><span><strong>Cash on Delivery</strong><small>Pay when your order is delivered.</small></span></div>
+            <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">Place order</button>
+        </div></aside>
+    </form>
 {% endblock %}

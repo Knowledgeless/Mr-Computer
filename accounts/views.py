@@ -29,6 +29,7 @@ def login(request):
         user = form.get_user()
         transfer_guest_cart(session_key, user)
         auth_login(request, user)
+        messages.success(request, f"Welcome back, {request.user}!")
         destination = request.POST.get("next", "")
         if not url_has_allowed_host_and_scheme(destination, allowed_hosts={request.get_host()}):
             destination = "accounts:overview"
@@ -45,7 +46,7 @@ def register(request):
         CustomerProfile.objects.create(user=user)
         transfer_guest_cart(session_key, user)
         auth_login(request, user)
-        messages.success(request, "Your account is ready.")
+        messages.success(request, f"Hello, {request.user}! Your account is ready.")
         return redirect("accounts:overview")
     return render(request, "accounts/register.html", {"form": form})
 
@@ -53,8 +54,8 @@ def register(request):
 @require_POST
 @login_required
 def logout(request):
+    messages.error(request, f"Goodbye, {request.user}!")
     auth_logout(request)
-    messages.info(request, "You have been signed out.")
     return redirect("catalog:home")
 
 
@@ -87,7 +88,7 @@ def profile(request):
             request.user.first_name = request.POST.get("first_name", "").strip()[:150]
             request.user.last_name = request.POST.get("last_name", "").strip()[:150]
             request.user.save(update_fields=["email", "first_name", "last_name"])
-            messages.success(request, "Profile updated.")
+            messages.success(request, f"Profile updated, {request.user.first_name}!")
             return redirect("accounts:profile")
     return render(request, "accounts/profile.html")
 
@@ -97,7 +98,7 @@ def addresses(request):
     form = CustomerAddressForm(request.POST or None, user=request.user)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Address saved.")
+        messages.success(request, f"Address saved, {request.user}!")
         return redirect("accounts:addresses")
     return render(
         request,
@@ -111,7 +112,7 @@ def addresses(request):
 def address_delete(request, address_id):
     address = get_object_or_404(CustomerAddress, pk=address_id, user=request.user)
     address.delete()
-    messages.success(request, "Address removed.")
+    messages.warning(request, f"Address removed, {request.user}!")
     return redirect("accounts:addresses")
 
 
@@ -128,14 +129,19 @@ def wishlist_add(request, variant_id):
     variant = get_object_or_404(ProductVariant, pk=variant_id, is_active=True, product__is_active=True)
     wishlist_object, _ = Wishlist.objects.get_or_create(user=request.user)
     WishlistItem.objects.get_or_create(wishlist=wishlist_object, variant=variant)
-    messages.success(request, "Added to your wishlist.")
+    messages.success(request, f"Added to your wishlist..!")
     return redirect("accounts:wishlist")
 
 
 @require_POST
 @login_required
 def wishlist_remove(request, item_id):
-    WishlistItem.objects.filter(pk=item_id, wishlist__user=request.user).delete()
+    deleted_count, _ = WishlistItem.objects.filter(
+        pk=item_id,
+        wishlist__user=request.user,
+    ).delete()
+    if deleted_count:
+        messages.warning(request, f"Removed from your wishlist..!")
     return redirect("accounts:wishlist")
 
 
