@@ -3144,6 +3144,28 @@ These are architectural invariants, not merely frontend validation rules.
 
 ---
 
+# Local Test Catalog Data
+
+Load the curated storefront test catalog into a local development database with:
+
+```bash
+python manage.py seed_test_catalog
+```
+
+The command is idempotent, preserves existing records, and refuses to run unless
+`DEBUG` is enabled and the database host is local. It loads 409 distinct product
+listings across 10 brands and 21 categories from
+[`catalog/fixtures/test_catalog_409.json`](./catalog/fixtures/test_catalog_409.json).
+Each fixture record retains its source listing URL. Product names, specifications,
+and BDT listing prices were captured from [Star Tech Bangladesh](https://www.startech.com.bd/)
+on the fixture date; [Tech Land BD's ASUS laptop listings](https://www.techlandbd.com/shop-laptop-computer/brand-laptops/asus-laptop)
+were also consulted for Bangladesh-market model context. Retail prices can change.
+No images are included. Inventory quantities are simulated, and the internal cost
+price is set to the listing price as a test placeholder; neither represents actual
+store stock or wholesale cost. Do not use this fixture as production catalog data.
+
+---
+
 # 84. Recommended Development Order
 
 Do not start with the homepage.

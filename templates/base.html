@@ -29,20 +29,24 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#site-menu" aria-label="Close menu"></button>
                             </div>
                             <div class="offcanvas-body align-items-center gap-3">
-                                <a class="nav-link fw-semibold" href="{% url 'catalog:product_list' %}">All products</a>
                                 <form class="header-search flex-grow-1" action="{% url 'catalog:product_list' %}" method="get" role="search">
                                     <label class="visually-hidden" for="site-search">Search products</label>
                                     <input id="site-search" class="form-control" name="q" type="search" value="{{ request.GET.q }}" placeholder="Search products, brands or SKU">
                                     <button class="btn btn-link" type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
                                 </form>
-                                <a class="header-action" href="{% url 'cart:detail' %}"><i class="bi bi-cart3"></i><span>Cart</span></a>
-                                {% if user.is_authenticated %}
-                                    <a class="header-action" href="{% url 'accounts:overview' %}"><i class="bi bi-person-circle"></i><span>My account</span></a>
-                                    <form class="header-signout" action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}<button class="header-action" type="submit"><i class="bi bi-box-arrow-right"></i><span>Sign out</span></button></form>
-                                {% else %}
-                                    <a class="header-action" href="{% url 'accounts:login' %}"><i class="bi bi-person-circle"></i><span>Login</span></a>
-                                    <a class="header-action" href="{% url 'accounts:register' %}"><i class="bi bi-person-plus"></i><span>Sign up</span></a>
-                                {% endif %}
+                                <div class="header-actions">
+                                    <a class="header-action" href="{% url 'cart:detail' %}"><span>Cart</span></a>
+                                    {% if user.is_authenticated %}
+                                        {% if user.is_staff %}
+                                            <a class="header-action" href="dashboard"><span>Dashboard</span></a>
+                                        {% endif %}
+                                        <a class="header-action" href="{% url 'accounts:overview' %}"><span>{{user | title}}</span></a>
+                                        <form class="header-signout" action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}<button class="header-action" type="submit"><span>Logout</span><i class="bi bi-box-arrow-right"></i></button></form>
+                                    {% else %}
+                                        <a class="header-action" href="{% url 'accounts:login' %}"><i class="bi bi-person-circle"></i><span>Login</span></a>
+                                        <a class="header-action" href="{% url 'accounts:register' %}"><i class="bi bi-person-plus"></i><span>Sign up</span></a>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                     </nav>
