@@ -4,7 +4,7 @@
     <div class="page-heading">
         <div>
             <span class="eyebrow">Your account</span>
-            <h1>Welcome Back, {{ request.user.first_name|default:request.user.username }} . . !</h1>
+            <h1>Welcome Back, {{ request.user.username | title }} . . !</h1>
             <p class="text-secondary">Your orders and account details, all in one place.</p>
         </div>
 
