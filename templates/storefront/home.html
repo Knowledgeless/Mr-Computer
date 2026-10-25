@@ -57,12 +57,12 @@
     {% if demo_products %}
         <section class="content-section home-products">
             <div class="section-heading"><div><span class="eyebrow">Popular picks</span><h2>Featured Products</h2><span class="demo-note"><i class="bi bi-info-circle"></i> Sample products shown for the design preview</span></div><a href="{% url 'catalog:product_list' %}">Browse all <i class="bi bi-arrow-right"></i></a></div>
-            <div class="row g-3 g-xl-4">{% for product in demo_products %}<div class="col-6 col-md-4 col-xl-2">{% include "partials/demo_product_card.html" %}</div>{% endfor %}</div>
+            <div class="row g-3 g-xl-4">{% for product in demo_products %}<div class="col-12 col-md-4 col-xl-2">{% include "partials/demo_product_card.html" %}</div>{% endfor %}</div>
         </section>
     {% elif featured_products %}
         <section class="content-section home-products">
             <div class="section-heading"><div><span class="eyebrow">Picked for you</span><h2>Featured products</h2></div><a href="{% url 'catalog:product_list' %}">Browse all <i class="bi bi-arrow-right"></i></a></div>
-            <div class="row g-3 g-xl-4">{% for product in featured_products %}<div class="col-6 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div>
+            <div class="row g-3 g-xl-4">{% for product in featured_products %}<div class="col-12 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div>
         </section>
     {% endif %}
 
@@ -75,10 +75,10 @@
     {% endif %}
 
     {% if best_sellers %}
-        <section class="content-section home-products"><div class="section-heading"><div><span class="eyebrow">Customer favorites</span><h2>Best sellers</h2></div><a href="{% url 'catalog:product_list' %}">View all <i class="bi bi-arrow-right"></i></a></div><div class="row g-3">{% for product in best_sellers %}<div class="col-6 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div></section>
+        <section class="content-section home-products"><div class="section-heading"><div><span class="eyebrow">Customer favorites</span><h2>Best sellers</h2></div><a href="{% url 'catalog:product_list' %}">View all <i class="bi bi-arrow-right"></i></a></div><div class="row g-3">{% for product in best_sellers %}<div class="col-12 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div></section>
     {% endif %}
     {% if new_arrivals %}
-        <section class="content-section home-products"><div class="section-heading"><div><span class="eyebrow">Just arrived</span><h2>New arrivals</h2></div><a href="{% url 'catalog:product_list' %}?sort=newest">See what's new <i class="bi bi-arrow-right"></i></a></div><div class="row g-3">{% for product in new_arrivals %}<div class="col-6 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div></section>
+        <section class="content-section home-products"><div class="section-heading"><div><span class="eyebrow">Just arrived</span><h2>New arrivals</h2></div><a href="{% url 'catalog:product_list' %}?sort=newest">See what's new <i class="bi bi-arrow-right"></i></a></div><div class="row g-3">{% for product in new_arrivals %}<div class="col-12 col-md-4 col-xl-3">{% include "partials/product_card.html" %}</div>{% endfor %}</div></section>
     {% endif %}
 
     <section class="store-benefits"><div><i class="bi bi-shield-check"></i><span><strong>100% genuine products</strong><small>Original & branded</small></span></div><div><i class="bi bi-credit-card"></i><span><strong>Secure payments</strong><small>Multiple payment options</small></span></div><div><i class="bi bi-cash-coin"></i><span><strong>Cash on delivery</strong><small>Pay when you receive</small></span></div><div><i class="bi bi-arrow-repeat"></i><span><strong>Easy returns</strong><small>Hassle-free service</small></span></div><div><i class="bi bi-headset"></i><span><strong>24/7 support</strong><small>We're here to help</small></span></div></section>
