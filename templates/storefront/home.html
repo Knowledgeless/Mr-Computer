@@ -46,7 +46,47 @@
                     {% if category.image %}
                     <img src="{{ category.image.url }}" alt="" loading="lazy">{% else %}
                     <span class="category-showcase__icon">
+                        {% if category.name == "Computers" %}
+                            <i class="bi bi-pc-display"></i>
+                        {% elif category.name == "PC Components" %}
+                            <i class="bi bi-cpu"></i>
+                        {% elif category.name == "Laptops" %}
+                            <i class="bi bi-laptop"></i>
+                        {% elif category.name == "Mobile Devices" %}
+                            <i class="bi bi-phone"></i>
+                        {% elif category.name == "Accessories" %}
+                            <i class="bi bi-headset"></i>
+                        {% elif category.name == "Gaming" %}
+                            <i class="bi bi-controller"></i>
+                        {% elif category.name == "Networking" %}
+                            <i class="bi bi-wifi"></i>
+                        {% elif category.name == "Storage" %}
+                            <i class="bi bi-hdd"></i>
+                        {% elif category.name == "Software" %}
+                            <i class="bi bi-box-arrow-in-right"></i>
+                        {% elif category.name == "Refurbished" %}   
+                            <i class="bi bi-arrow-repeat"></i>
+                        {% elif category.name == "Deals" %}
+                            <i class="bi bi-tag"></i>
+                        {% elif category.name == "Audio" %}
+                            <i class="bi bi-speaker"></i>
+                        {% elif category.name == "Video" %}
+                            <i class="bi bi-camera-video"></i>
+                        {% elif category.name == "Printers" %}
+                            <i class="bi bi-printer"></i>
+                        {% elif category.name == "Displays" %}
+                            <i class="bi bi-display"></i>
+                        {% elif category.name == "Cables" %}
+                            <i class="bi bi-plug"></i>
+                        {% elif category.name == "Power" %}
+                            <i class="bi bi-battery-full"></i>
+                        {% elif category.name == "Smart Home" %}
+                            <i class="bi bi-house-door"></i>
+                        {% elif category.name == "Wearables" %}
+                            <i class="bi bi-watch"></i>
+                        {% else %}
                         <i class="bi bi-box-seam"></i>
+                        {% endif %}
                     </span>{% endif %}
                     <strong>{{ category.name }}</strong>
                 </a>
