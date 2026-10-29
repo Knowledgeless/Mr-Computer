@@ -19,7 +19,7 @@
             {% if default_variant and default_variant.inventory.available_quantity > 0 %}
                 <p class="stock-status text-success"><i class="bi bi-check-circle"></i> In stock — {{ default_variant.inventory.available_quantity }} available</p>
             {% else %}<p class="stock-status text-danger">Out of stock</p>{% endif %}
-            <form action="{% url 'cart:add' %}" method="post" class="purchase-form">
+            <form action="{% url 'cart:add' %}" method="post" class="purchase-form" data-cart-add>
                 {% csrf_token %}
                 <label class="form-label" for="variant-select">Option</label>
                 <select class="form-select mb-3" id="variant-select" name="variant" required>

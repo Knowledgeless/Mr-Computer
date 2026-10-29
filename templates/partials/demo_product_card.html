@@ -1,13 +1,17 @@
 <article class="product-card demo-product-card h-100">
-    <a class="product-card__image-wrap demo-product-card__visual tone-{{ product.tone }}" href="{% url 'catalog:product_list' %}" aria-label="Browse {{ product.name }}">
-        <span class="product-badge">{{ product.tag }}</span>
-        <span class="demo-product-icon"><i class="bi {{ product.icon }}"></i></span>
-        <span class="demo-image-orbit"></span>
-    </a>
+    <div class="product-card__visual">
+        <a class="product-card__image-wrap demo-product-card__visual tone-{{ product.tone }}" href="{% url 'catalog:product_list' %}" aria-label="Browse {{ product.name }}">
+            <span class="product-badge">{{ product.tag }}</span>
+            <span class="demo-product-icon"><i class="bi {{ product.icon }}"></i></span>
+            <span class="demo-image-orbit"></span>
+        </a>
+        <a class="product-card__wishlist" href="{% url 'catalog:product_list' %}" aria-label="Browse {{ product.name }}"><i class="bi bi-heart"></i></a>
+    </div>
     <div class="product-card__body">
-        <p class="product-brand">{{ product.brand }}</p>
         <h3 class="product-card__title"><a href="{% url 'catalog:product_list' %}">{{ product.name }}</a></h3>
-        <p class="product-price mb-3">৳ {{ product.price }}</p>
-        <a class="btn btn-primary w-100" href="{% url 'catalog:product_list' %}">Explore products</a>
+        <div class="product-card__buy-row">
+            <p class="product-price">৳ {{ product.price }}</p>
+            <a class="product-card__cart" href="{% url 'catalog:product_list' %}" aria-label="Explore products"><i class="bi bi-cart-plus"></i></a>
+        </div>
     </div>
 </article>

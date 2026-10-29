@@ -78,6 +78,115 @@
     document.querySelectorAll("[data-toast]").forEach(startToast);
     window.MrComputers = { ...window.MrComputers, showToast };
 
+    document.querySelectorAll("[data-cart-add]").forEach((form) => {
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const button = form.querySelector('button[type="submit"]');
+            const originalContent = button?.innerHTML;
+            if (button) {
+                button.disabled = true;
+                button.setAttribute("aria-busy", "true");
+            }
+            try {
+                const response = await fetch(form.action, {
+                    method: "POST",
+                    body: new FormData(form),
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest",
+                        Accept: "application/json",
+                        ...(csrfCookie ? { "X-CSRFToken": csrfCookie.split("=")[1] } : {}),
+                    },
+                    credentials: "same-origin",
+                });
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.error || "We couldn't add that product to your cart.");
+                }
+                document.querySelectorAll("[data-cart-count]").forEach((badge) => {
+                    badge.textContent = String(payload.cart_count);
+                });
+                document.querySelectorAll(".header-cart").forEach((link) => {
+                    link.setAttribute("aria-label", `Cart, ${payload.cart_count} product types`);
+                });
+                showToast(payload.message, "success");
+            } catch (error) {
+                showToast(error instanceof Error ? error.message : "We couldn't add that product to your cart.", "error");
+            } finally {
+                if (button) {
+                    button.disabled = false;
+                    button.removeAttribute("aria-busy");
+                    if (originalContent !== undefined) button.innerHTML = originalContent;
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+        const updateThemeButton = () => {
+            const isDark = document.documentElement.dataset.theme !== "light";
+            button.setAttribute("aria-label", `Switch to ${isDark ? "light" : "dark"} mode`);
+            button.title = `Switch to ${isDark ? "light" : "dark"} mode`;
+            button.innerHTML = `<i class="bi ${isDark ? "bi-sun-fill" : "bi-moon-stars-fill"}" aria-hidden="true"></i>`;
+        };
+        updateThemeButton();
+        button.addEventListener("click", () => {
+            const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+            document.documentElement.dataset.theme = nextTheme;
+            try {
+                localStorage.setItem("mc-theme", nextTheme);
+            } catch {
+                showToast("Your theme preference could not be saved.", "warning");
+            }
+            updateThemeButton();
+        });
+    });
+
+    document.querySelectorAll("[data-home-slider]").forEach((slider) => {
+        const slides = Array.from(slider.querySelectorAll("[data-hero-slide]"));
+        const dots = Array.from(slider.querySelectorAll("[data-hero-dot]"));
+        if (slides.length < 2) return;
+        let currentIndex = 0;
+        let timer;
+        const showSlide = (index) => {
+            currentIndex = (index + slides.length) % slides.length;
+            slides.forEach((slide, slideIndex) => {
+                const isActive = slideIndex === currentIndex;
+                slide.classList.toggle("is-active", isActive);
+                slide.setAttribute("aria-hidden", String(!isActive));
+            });
+            dots.forEach((dot, dotIndex) => {
+                if (dotIndex === currentIndex) dot.setAttribute("aria-current", "true");
+                else dot.removeAttribute("aria-current");
+            });
+        };
+        const stopTimer = () => window.clearInterval(timer);
+        const startTimer = () => {
+            stopTimer();
+            if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                timer = window.setInterval(() => showSlide(currentIndex + 1), 6000);
+            }
+        };
+        slider.querySelector("[data-hero-previous]")?.addEventListener("click", () => {
+            showSlide(currentIndex - 1);
+            startTimer();
+        });
+        slider.querySelector("[data-hero-next]")?.addEventListener("click", () => {
+            showSlide(currentIndex + 1);
+            startTimer();
+        });
+        dots.forEach((dot) => dot.addEventListener("click", () => {
+            showSlide(Number(dot.dataset.heroDot));
+            startTimer();
+        }));
+        slider.addEventListener("mouseenter", stopTimer);
+        slider.addEventListener("mouseleave", startTimer);
+        slider.addEventListener("focusin", stopTimer);
+        slider.addEventListener("focusout", (event) => {
+            if (!slider.contains(event.relatedTarget)) startTimer();
+        });
+        startTimer();
+    });
+
     document.querySelectorAll("[data-coupon-form]").forEach((form) => {
         form.addEventListener("submit", async (event) => {
             event.preventDefault();

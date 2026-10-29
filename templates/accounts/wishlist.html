@@ -21,7 +21,7 @@
                         {{ item.variant.selling_price|floatformat:2 }}
                     </strong>
                     <div class="d-flex gap-2">
-                        <form action="{% url 'cart:add' %}" method="post">{% csrf_token %}
+                        <form action="{% url 'cart:add' %}" method="post" data-cart-add>{% csrf_token %}
                             <input type="hidden" name="variant" value="{{ item.variant.pk }}">
                             <input type="hidden" name="quantity" value="1">
                             <button class="btn btn-sm btn-primary" type="submit">Add to cart</button>

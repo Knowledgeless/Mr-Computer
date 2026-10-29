@@ -11,6 +11,9 @@ class BannerForm(forms.ModelForm):
             "start_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "end_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
+        help_texts = {
+            "image": "Use a 1200 × 630 px landscape image (JPEG, PNG or WebP, up to 300 KB).",
+        }
 
 
 class PageForm(forms.ModelForm):

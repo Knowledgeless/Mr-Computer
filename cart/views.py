@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.db.models import Count
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -26,19 +28,31 @@ def detail(request):
 @require_POST
 @rate_limit(key="cart-add", limit=30, period=60)
 def add(request):
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     form = AddCartItemForm(request.POST)
     if not form.is_valid():
+        if is_ajax:
+            return JsonResponse({"error": "Select a valid product and quantity."}, status=400)
         messages.error(request, "Select a valid product and quantity.")
         return redirect("cart:detail")
     cart = get_cart_for_request(request)
     try:
         add_item(cart=cart, variant_id=form.cleaned_data["variant"].pk, quantity=form.cleaned_data["quantity"])
     except ValidationError as error:
+        if is_ajax:
+            return JsonResponse({"error": error.messages[0]}, status=400)
         messages.error(request, error.messages[0])
     else:
+        if is_ajax:
+            cart_count = cart.items.aggregate(total=Count("pk"))["total"] or 0
+            return JsonResponse(
+                {
+                    "message": "Product added to your cart.",
+                    "cart_count": cart_count,
+                }
+            )
         messages.success(request, "Added to your cart..!")
     return redirect("cart:detail")
-    # return redirect("cart:detail")
 
 
 @require_POST

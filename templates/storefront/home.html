@@ -4,31 +4,37 @@
 {% block body_class %}storefront-body home-page{% endblock %}
 {% block main_class %}container-fluid storefront-home px-3 px-lg-4 py-3 py-lg-4{% endblock %}
 {% block content %}
-    {% if banners %}
-        {% with hero=banners.0 %}
-            <section class="hero-panel hero-panel--store">
-                <div class="hero-copy">
-                    <span class="eyebrow">Your tech. Our priority.</span>
-                    <h1>{{ hero.title }}</h1>
-                    <p>{{ hero.subtitle|default:"Custom builds. Premium components. Expert support." }}</p>
-                    {% if hero.button_text and hero.button_url %}<a class="btn btn-primary btn-lg" href="{{ hero.button_url }}">{{ hero.button_text }} <i class="bi bi-arrow-right"></i></a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'pc_builder:builder' %}">Start building <i class="bi bi-arrow-right"></i></a>{% endif %}
+    {% with slides=banners|default:demo_banners %}
+        <section class="hero-slider" data-home-slider aria-label="Featured promotions">
+            {% for slide in slides %}
+                <article class="hero-slide{% if forloop.first %} is-active{% endif %}" data-hero-slide aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
+                    {% if slide.image %}<img class="hero-slide__image" src="{{ slide.image.url }}" alt="" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+                    {% else %}<img class="hero-slide__image" src="{{ slide.image_url }}" alt="" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>{% endif %}
+                    <div class="hero-slide__shade"></div>
+                    <div class="hero-slide__copy">
+                        <span class="eyebrow">Your tech. Our priority.</span>
+                        <h1>{{ slide.title }}</h1>
+                        <p>{{ slide.subtitle|default:"Custom builds. Premium components. Expert support." }}</p>
+                        {% if slide.button_text and slide.button_url %}<a class="btn btn-primary btn-lg" href="{{ slide.button_url }}">{{ slide.button_text }} <i class="bi bi-arrow-right"></i></a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'pc_builder:builder' %}">Start building <i class="bi bi-arrow-right"></i></a>{% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+            {% if slides|length > 1 %}
+                <div class="hero-slider__controls" aria-label="Slide controls">
+                    <button type="button" data-hero-previous aria-label="Previous slide"><i class="bi bi-arrow-left"></i></button>
+                    <div class="hero-slider__dots">{% for slide in slides %}<button type="button" data-hero-dot="{{ forloop.counter0 }}" aria-label="Show slide {{ forloop.counter }}"{% if forloop.first %} aria-current="true"{% endif %}></button>{% endfor %}</div>
+                    <button type="button" data-hero-next aria-label="Next slide"><i class="bi bi-arrow-right"></i></button>
                 </div>
-                <div class="hero-art" aria-hidden="true"><div class="hero-art__glow"></div><i class="bi bi-pc-display-horizontal"></i><i class="bi bi-laptop"></i><span class="hero-art__orb hero-art__orb--one"></span><span class="hero-art__orb hero-art__orb--two"></span></div>
-                <div class="hero-benefits"><div><i class="bi bi-shield-check"></i><span><strong>Top quality products</strong><small>Genuine & trusted</small></span></div><div><i class="bi bi-tag"></i><span><strong>Best prices</strong><small>Great deals, always</small></span></div><div><i class="bi bi-truck"></i><span><strong>Fast & safe delivery</strong><small>Across the country</small></span></div><div><i class="bi bi-headset"></i><span><strong>Expert support</strong><small>Before & after sale</small></span></div></div>
-            </section>
-        {% endwith %}
-    {% else %}
-        <section class="hero-panel hero-panel--store hero-panel--fallback">
-            <div class="hero-copy">
-                <span class="eyebrow">Your tech. Our priority.</span>
-                <h1>Build Your Dream PC</h1>
-                <p>Custom builds. Premium components. Expert support.</p>
-                <a class="btn btn-primary btn-lg" href="{% url 'pc_builder:builder' %}">Start building <i class="bi bi-arrow-right"></i></a>
-            </div>
-            <div class="hero-art" aria-hidden="true"><div class="hero-art__glow"></div><i class="bi bi-pc-display-horizontal"></i><i class="bi bi-laptop"></i><span class="hero-art__orb hero-art__orb--one"></span><span class="hero-art__orb hero-art__orb--two"></span></div>
-            <div class="hero-benefits"><div><i class="bi bi-shield-check"></i><span><strong>Top quality products</strong><small>Genuine & trusted</small></span></div><div><i class="bi bi-tag"></i><span><strong>Best prices</strong><small>Great deals, always</small></span></div><div><i class="bi bi-truck"></i><span><strong>Fast & safe delivery</strong><small>Across the country</small></span></div><div><i class="bi bi-headset"></i><span><strong>Expert support</strong><small>Before & after sale</small></span></div></div>
+            {% endif %}
+            {% if user.is_staff or user.is_superuser %}<a class="hero-slider__manage" href="{% url 'dashboard:content' %}"><i class="bi bi-pencil-square"></i> Manage slides</a>{% endif %}
         </section>
-    {% endif %}
+    {% endwith %}
+    <div class="hero-benefits hero-benefits--strip">
+        <div><i class="bi bi-shield-check"></i><span><strong>Top quality products</strong><small>Genuine & trusted</small></span></div>
+        <div><i class="bi bi-tag"></i><span><strong>Best prices</strong><small>Great deals, always</small></span></div>
+        <div><i class="bi bi-truck"></i><span><strong>Fast & safe delivery</strong><small>Across the country</small></span></div>
+        <div><i class="bi bi-headset"></i><span><strong>Expert support</strong><small>Before & after sale</small></span></div>
+    </div>
 
     <section class="home-categories" aria-labelledby="home-categories-title">
         <div class="section-heading">

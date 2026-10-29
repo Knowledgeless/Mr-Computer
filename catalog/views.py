@@ -1,11 +1,23 @@
 from django.conf import settings
 from django import forms
 from django.core.paginator import Paginator
-from django.db.models import Prefetch, Q
+from django.db.models import Avg, OuterRef, Prefetch, Q, Subquery
 from django.shortcuts import get_object_or_404, render
 
 from catalog.models import Brand, Category, Product, ProductVariant
 from cms.models import Banner, HomeSection, Page
+from reviews.models import Review
+
+
+def _with_approved_rating(queryset):
+    average_rating = (
+        Review.objects.filter(product_id=OuterRef("pk"), status=Review.Status.APPROVED)
+        .order_by()
+        .values("product_id")
+        .annotate(average=Avg("rating"))
+        .values("average")
+    )
+    return queryset.annotate(average_rating=Subquery(average_rating))
 
 
 class ProductFilterForm(forms.Form):
@@ -30,21 +42,21 @@ class ProductFilterForm(forms.Form):
 
 def home(request):
     sections = HomeSection.objects.filter(is_active=True).order_by("display_order")
-    featured_products = Product.objects.filter(
+    featured_products = _with_approved_rating(Product.objects.filter(
         is_active=True,
         status__in=[Product.Status.ACTIVE, Product.Status.OUT_OF_STOCK],
         is_featured=True,
-    ).prefetch_related("images", "variants__inventory")[:8]
-    new_arrivals = Product.objects.filter(
+    )).prefetch_related("images", "variants__inventory")[:8]
+    new_arrivals = _with_approved_rating(Product.objects.filter(
         is_active=True,
         status__in=[Product.Status.ACTIVE, Product.Status.OUT_OF_STOCK],
         is_new_arrival=True,
-    ).prefetch_related("images", "variants__inventory")[:8]
-    best_sellers = Product.objects.filter(
+    )).prefetch_related("images", "variants__inventory")[:8]
+    best_sellers = _with_approved_rating(Product.objects.filter(
         is_active=True,
         status__in=[Product.Status.ACTIVE, Product.Status.OUT_OF_STOCK],
         is_best_seller=True,
-    ).prefetch_related("images", "variants__inventory")[:8]
+    )).prefetch_related("images", "variants__inventory")[:8]
     demo_products = []
     if settings.DEBUG and not Product.objects.filter(is_active=True).exists():
         demo_products = [
@@ -55,9 +67,34 @@ def home(request):
             {"name": "Refurbished HP Laptop", "brand": "HP", "price": "39,900", "icon": "bi-laptop-fill", "tone": "cyan", "tag": "Refurbished"},
             {"name": "TP-Link WiFi Router AC1200", "brand": "TP-Link", "price": "4,900", "icon": "bi-router-fill", "tone": "orange", "tag": "Networking"},
         ]
+    banners = [banner for banner in Banner.objects.all() if banner.is_currently_active]
+    demo_banners = [
+        {
+            "title": "Power up your setup",
+            "subtitle": "Discover the gear that makes every day more productive.",
+            "image_url": "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=1200&h=630&q=85",
+            "button_text": "Shop laptops",
+            "button_url": "/products/?q=laptop",
+        },
+        {
+            "title": "Build without limits",
+            "subtitle": "Find the components for your next great PC build.",
+            "image_url": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=1200&h=630&q=85",
+            "button_text": "Build your PC",
+            "button_url": "/builder/",
+        },
+        {
+            "title": "Your next-level workspace",
+            "subtitle": "Thoughtful technology, selected for work and play.",
+            "image_url": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&h=630&q=85",
+            "button_text": "Explore products",
+            "button_url": "/products/",
+        },
+    ]
     context = {
         "sections": sections,
-        "banners": [banner for banner in Banner.objects.all() if banner.is_currently_active],
+        "banners": banners,
+        "demo_banners": demo_banners if not banners else [],
         "categories": Category.objects.filter(is_active=True, parent__isnull=True),
         "featured_products": featured_products,
         "new_arrivals": new_arrivals,
@@ -68,10 +105,10 @@ def home(request):
 
 
 def product_list(request, category_slug=None):
-    products = Product.objects.filter(
+    products = _with_approved_rating(Product.objects.filter(
         is_active=True,
         status__in=[Product.Status.ACTIVE, Product.Status.OUT_OF_STOCK],
-    ).select_related("category", "brand").prefetch_related(
+    )).select_related("category", "brand").prefetch_related(
         "images",
         Prefetch(
             "variants",
