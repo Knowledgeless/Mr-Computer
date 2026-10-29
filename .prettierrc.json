@@ -1,0 +1,13 @@
+{
+    "printWidth": 100,
+    "tabWidth": 4,
+    "useTabs": false,
+    "overrides": [
+        {
+            "files": "templates/**/*.html",
+            "options": {
+                "parser": "html"
+            }
+        }
+    ]
+}
