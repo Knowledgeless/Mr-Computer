@@ -22,6 +22,9 @@ Completed
 - Added a persistent dark-by-default storefront theme with a light-mode toggle; preference is stored in browser local storage.
 - Refined dark/light mode after visual review: use coherent surface/text palettes, retain a dark navigation bar in either mode, and provide a matching theme toggle in the staff dashboard.
 - Corrected the cart badge count to count distinct cart lines/product variants, not summed quantities.
+- Updated the header cart to an icon-only circular control with its distinct-product count overlaid in a red badge.
+- Added layered navy/blue/violet/teal storefront gradients, larger high-contrast gradient headings, pastel borderless homepage category tiles with solid-color icons, and yellow/lime circular product cart actions.
+- Replaced the catalog's box-style pager with compact previous/next arrows, numbered page links, current-page highlighting, and ellipses for skipped ranges; pagination links preserve filters and replace the page parameter.
 
 Validation status
 -----------------
@@ -34,6 +37,7 @@ Validation status
 - Storefront update verification (2026-10-30): `DJANGO_DEBUG=1 python manage.py check`, all five `core.tests` and `cart.tests`, compilation of all 42 templates, `node --check static/js/app.js`, and `git diff --check` pass.
 - Browser verification (2026-10-30): homepage responds successfully, hero image loads, desktop slider measured at 1200:630, slide navigation works, and theme toggling switches to light and back to dark. Local homepage used design-preview products, so a database-backed successful cart add was not exercised.
 - Theme/cart refinement verification (2026-10-30): all six focused `core.tests` and `cart.tests`, Django checks, JavaScript syntax, and diff checks pass. Browser inspection confirms distinct dark/light page and card surfaces, a navy header/category menu in both modes, and preference persistence across reloads.
+- Storefront visual/pagination verification (2026-10-30): all nine `catalog.tests`, `cart.tests`, and `core.tests` pass; Django checks, all 42 template compilations, JavaScript syntax, and diff checks pass. Browser inspection confirms gradient backgrounds, colorful borderless category tiles with unboxed icons, circular cart control with red count, and circular lime/yellow add-to-cart action.
 
 Important behavior
 ------------------

@@ -27,7 +27,7 @@
                             {% csrf_token %}
                             <input type="hidden" name="variant" value="{{ variant.pk }}">
                             <input type="hidden" name="quantity" value="1">
-                            <button type="submit" aria-label="Add {{ product.name }} to cart"><i class="bi bi-cart-plus"></i></button>
+                            <button type="submit" aria-label="Add {{ product.name }} to cart" class="add_to_cart_plus"><i class="bi bi-cart-plus-fill"></i></button>
                         </form>
                     {% else %}<a class="product-card__cart is-unavailable" href="{% url 'catalog:product_detail' product.slug %}" aria-label="View {{ product.name }}"><i class="bi bi-arrow-up-right"></i></a>{% endif %}
                 {% else %}<p class="text-secondary mb-0">Price unavailable</p>{% endif %}

@@ -20,6 +20,41 @@ def _with_approved_rating(queryset):
     return queryset.annotate(average_rating=Subquery(average_rating))
 
 
+def _pagination_url(request, page_number):
+    query = request.GET.copy()
+    query["page"] = page_number
+    return f"{request.path}?{query.urlencode()}"
+
+
+def _pagination_links(request, paginator, current_page):
+    total_pages = paginator.num_pages
+    if total_pages <= 7:
+        page_numbers = list(range(1, total_pages + 1))
+    else:
+        page_numbers = {1, total_pages, current_page}
+        if current_page <= 3:
+            page_numbers.update(range(1, 5))
+        elif current_page >= total_pages - 2:
+            page_numbers.update(range(total_pages - 3, total_pages + 1))
+        else:
+            page_numbers.update((current_page - 1, current_page + 1))
+        page_numbers = sorted(page_numbers)
+
+    links = []
+    previous_page = None
+    for page_number in page_numbers:
+        if previous_page is not None and page_number - previous_page > 1:
+            links.append({"ellipsis": True})
+        links.append(
+            {
+                "number": page_number,
+                "url": _pagination_url(request, page_number),
+            }
+        )
+        previous_page = page_number
+    return links
+
+
 class ProductFilterForm(forms.Form):
     q = forms.CharField(max_length=100, required=False)
     brand = forms.ModelChoiceField(queryset=Brand.objects.filter(is_active=True), required=False)
@@ -150,6 +185,7 @@ def product_list(request, category_slug=None):
     else:
         products = products.order_by("-created_at")
     page_obj = Paginator(products.distinct(), 16).get_page(request.GET.get("page"))
+    pagination_links = _pagination_links(request, page_obj.paginator, page_obj.number)
     return render(
         request,
         "catalog/product_list.html",
@@ -159,6 +195,9 @@ def product_list(request, category_slug=None):
             "category": category,
             "query": query,
             "filter_form": form,
+            "pagination_links": pagination_links,
+            "previous_page_url": _pagination_url(request, page_obj.previous_page_number) if page_obj.has_previous else "",
+            "next_page_url": _pagination_url(request, page_obj.next_page_number) if page_obj.has_next else "",
         },
     )
 

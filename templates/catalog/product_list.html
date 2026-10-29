@@ -19,10 +19,14 @@
         <div class="empty-state"><i class="bi bi-search"></i><h2>No products found</h2><p>Try changing your filters or search terms.</p><a class="btn btn-primary" href="{% url 'catalog:product_list' %}">Browse all products</a></div>
     {% endif %}
     {% if page_obj.paginator.num_pages > 1 %}
-        <nav class="mt-5" aria-label="Product pages"><ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a></li>{% endif %}
-            <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-            {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+        <nav class="product-pagination" aria-label="Product pages"><ul>
+            {% if page_obj.has_previous %}<li><a class="product-pagination__arrow" href="{{ previous_page_url }}" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a></li>{% else %}<li><span class="product-pagination__arrow is-disabled" aria-hidden="true"><i class="bi bi-chevron-left"></i></span></li>{% endif %}
+            {% for link in pagination_links %}
+                {% if link.ellipsis %}<li><span class="product-pagination__ellipsis" aria-hidden="true">...</span></li>
+                {% elif link.number == page_obj.number %}<li><span class="product-pagination__page is-current" aria-current="page">{{ link.number }}</span></li>
+                {% else %}<li><a class="product-pagination__page" href="{{ link.url }}" aria-label="Page {{ link.number }}">{{ link.number }}</a></li>{% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}<li><a class="product-pagination__arrow" href="{{ next_page_url }}" aria-label="Next page"><i class="bi bi-chevron-right"></i></a></li>{% else %}<li><span class="product-pagination__arrow is-disabled" aria-hidden="true"><i class="bi bi-chevron-right"></i></span></li>{% endif %}
         </ul></nav>
     {% endif %}
 {% endblock %}
