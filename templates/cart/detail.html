@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Your Cart | Mr. Computers{% endblock %}
 {% block content %}
-    <div class="page-heading"><div><span class="eyebrow">Ready when you are</span><h1>Your cart</h1></div></div>
+    <div class="page-heading"><div><h1 class="eyebrow">Your cart</h1></div></div>
     {% if items %}
         <div class="row g-4">
             <div class="col-lg-8">
@@ -9,11 +9,22 @@
                     {% for item in items %}
                         <article class="cart-line">
                             {% with image=item.variant.product.images.all|first %}
-                                <a class="cart-line__image" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{% if image %}<img src="{{ image.image.url }}" alt="{{ image.alt_text|default:item.variant.product.name }}" width="120" height="120" loading="lazy">{% else %}<span class="image-placeholder"><i class="bi bi-image"></i></span>{% endif %}</a>
+                                <a class="cart-line__image" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{% if image %}
+                                    <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:item.variant.product.name }}" width="120" height="120" loading="lazy">{% else %}<span class="image-placeholder"><i class="bi bi-image"></i></span>{% endif %}</a>
                             {% endwith %}
-                            <div class="cart-line__info"><a class="fw-semibold" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{{ item.variant.product.name }}</a><small class="text-secondary d-block">{{ item.variant.variant_name }} · {{ item.variant.sku }}</small><strong class="d-block mt-2">৳ {{ item.variant.selling_price|floatformat:2 }}</strong></div>
-                            <form class="cart-line__quantity" action="{% url 'cart:update' item.pk %}" method="post">{% csrf_token %}<label class="visually-hidden" for="qty-{{ item.pk }}">Quantity</label><input class="form-control" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="20" value="{{ item.quantity }}"><button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Update</button></form>
-                            <div class="cart-line__total"><strong>৳ {{ item.line_total|floatformat:2 }}</strong><form action="{% url 'cart:remove' item.pk %}" method="post">{% csrf_token %}<button class="btn btn-link text-danger p-0 mt-2" type="submit">Remove</button></form></div>
+                            <div class="cart-line__info">
+                                <a class="fw-semibold" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{{ item.variant.product.name }}</a>
+                                <small class="text-secondary d-block">{{ item.variant.variant_name }} · {{ item.variant.sku }}</small>
+                                <strong class="d-block mt-2">৳ {{ item.variant.selling_price }}</strong>
+                            </div>
+                            <form class="cart-line__quantity" action="{% url 'cart:update' item.pk %}" method="post">{% csrf_token %}
+                                <label class="visually-hidden" for="qty-{{ item.pk }}">Quantity</label>
+                                <input class="form-control" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="20" value="{{ item.quantity }}">
+                                <button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Update</button>
+                            </form>
+                            <div class="cart-line__total"><strong>৳ {{ item.line_total|floatformat:2 }}</strong>
+                            <form action="{% url 'cart:remove' item.pk %}" method="post">{% csrf_token %}<button class="btn btn-link text-danger p-0 mt-2" type="submit"> <i class="bi bi-trash-fill"></i> </button></form>
+                            <div class="cart-line__total"></div>
                         </article>
                     {% endfor %}
                 </div>

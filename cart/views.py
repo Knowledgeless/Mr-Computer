@@ -38,6 +38,7 @@ def add(request):
     else:
         messages.success(request, "Added to your cart..!")
     return redirect("cart:detail")
+    # return redirect("cart:detail")
 
 
 @require_POST
