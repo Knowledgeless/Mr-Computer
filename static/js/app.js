@@ -78,6 +78,260 @@
     document.querySelectorAll("[data-toast]").forEach(startToast);
     window.MrComputers = { ...window.MrComputers, showToast };
 
+    document.querySelectorAll("[data-search-filters] [data-filter-field]").forEach((field) => {
+        const control = field.querySelector("[data-filter-control]");
+        if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;
+
+        const updateValueState = () => field.classList.toggle("has-value", Boolean(control.value));
+        updateValueState();
+        control.addEventListener("input", updateValueState);
+        control.addEventListener("change", updateValueState);
+    });
+
+    document.querySelectorAll("[data-search-filters] [data-filter-select] select").forEach((select) => {
+        const field = select.closest("[data-filter-field]");
+        const label = field?.querySelector("label");
+        if (!field || !label) return;
+
+        const wrapper = document.createElement("div");
+        const trigger = document.createElement("button");
+        const icon = document.createElement("i");
+        const menu = document.createElement("div");
+        const options = Array.from(select.options);
+        const placeholder = label.textContent.trim();
+        const menuOptions = [];
+        const triggerId = `${select.id}-trigger`;
+        const menuId = `${select.id}-menu`;
+
+        wrapper.className = "search-filter-select";
+        trigger.className = "search-filter-select__trigger";
+        trigger.type = "button";
+        trigger.id = triggerId;
+        trigger.setAttribute("aria-haspopup", "listbox");
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.setAttribute("aria-controls", menuId);
+        trigger.setAttribute("aria-labelledby", `${select.id}-label`);
+        icon.className = "bi bi-chevron-down";
+        icon.setAttribute("aria-hidden", "true");
+        menu.className = "search-filter-select__menu";
+        menu.id = menuId;
+        menu.setAttribute("role", "listbox");
+        menu.setAttribute("aria-labelledby", `${select.id}-label`);
+        label.id = `${select.id}-label`;
+        label.htmlFor = triggerId;
+        select.classList.add("search-filter-select__native");
+        select.tabIndex = -1;
+        select.setAttribute("aria-hidden", "true");
+
+        const syncSelection = () => {
+            const selectedOption = options.find((option) => option.value === select.value);
+            trigger.firstChild.textContent = select.value ? selectedOption?.textContent.trim() || "" : "";
+            menuOptions.forEach((optionButton, index) => {
+                const isSelected = options[index].value === select.value;
+                optionButton.setAttribute("aria-selected", String(isSelected));
+                if (isSelected) optionButton.classList.add("is-selected");
+                else optionButton.classList.remove("is-selected");
+            });
+            field.classList.toggle("has-value", Boolean(select.value));
+        };
+
+        const setOpen = (isOpen) => {
+            wrapper.classList.toggle("is-open", isOpen);
+            trigger.setAttribute("aria-expanded", String(isOpen));
+            field.classList.toggle("has-value", isOpen || Boolean(select.value));
+            if (isOpen) positionMenu();
+        };
+
+        const positionMenu = () => {
+            const triggerRect = trigger.getBoundingClientRect();
+            const viewportPadding = 12;
+            const minimumMenuWidth = Math.min(240, window.innerWidth - viewportPadding * 2);
+            const preferredMenuWidth = Math.min(
+                Math.max(triggerRect.width, menuOptions.length > 8 ? 280 : 220),
+                window.innerWidth - viewportPadding * 2,
+            );
+            const availableHeight = Math.max(36, window.innerHeight - viewportPadding * 2);
+            const maxRows = Math.max(1, Math.floor((availableHeight - 12) / 36));
+            const columns = Math.min(
+                menuOptions.length,
+                Math.max(menuOptions.length > 8 ? 2 : 1, Math.ceil(menuOptions.length / maxRows)),
+            );
+
+            menu.style.position = "fixed";
+            menu.style.width = `${preferredMenuWidth}px`;
+            menu.style.maxHeight = "none";
+            menu.style.overflowY = "visible";
+            menu.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+            menu.style.left = `${Math.min(
+                Math.max(triggerRect.left, viewportPadding),
+                window.innerWidth - preferredMenuWidth - viewportPadding,
+            )}px`;
+            menu.style.top = `${viewportPadding}px`;
+
+            const menuHeight = menu.getBoundingClientRect().height;
+            const belowSpace = window.innerHeight - triggerRect.bottom - viewportPadding;
+            const aboveSpace = triggerRect.top - viewportPadding;
+            if (menuHeight <= belowSpace) {
+                menu.style.top = `${triggerRect.bottom + 6}px`;
+                return;
+            }
+            if (menuHeight <= aboveSpace) {
+                menu.style.top = `${triggerRect.top - menuHeight - 6}px`;
+                return;
+            }
+
+            const rightSpace = window.innerWidth - triggerRect.right - viewportPadding;
+            const leftSpace = triggerRect.left - viewportPadding;
+            if (rightSpace >= minimumMenuWidth) {
+                menu.style.width = `${Math.min(preferredMenuWidth, rightSpace)}px`;
+                menu.style.left = `${triggerRect.right + 6}px`;
+            } else if (leftSpace >= minimumMenuWidth) {
+                const width = Math.min(preferredMenuWidth, leftSpace);
+                menu.style.width = `${width}px`;
+                menu.style.left = `${triggerRect.left - width - 6}px`;
+            }
+            const fittedHeight = menu.getBoundingClientRect().height;
+            menu.style.top = `${Math.max(
+                viewportPadding,
+                Math.min(
+                    triggerRect.top + (triggerRect.height - fittedHeight) / 2,
+                    window.innerHeight - fittedHeight - viewportPadding,
+                ),
+            )}px`;
+        };
+
+        options.forEach((option) => {
+            const optionButton = document.createElement("button");
+            optionButton.type = "button";
+            optionButton.className = "search-filter-select__option";
+            optionButton.setAttribute("role", "option");
+            optionButton.setAttribute("aria-selected", String(option.selected));
+            optionButton.tabIndex = -1;
+            optionButton.textContent = option.textContent.trim() || placeholder;
+            optionButton.addEventListener("click", () => {
+                select.value = option.value;
+                select.dispatchEvent(new Event("change", { bubbles: true }));
+                syncSelection();
+                trigger.focus();
+                setOpen(false);
+            });
+            menuOptions.push(optionButton);
+            menu.append(optionButton);
+        });
+
+        trigger.append(document.createTextNode(placeholder), icon);
+        select.replaceWith(wrapper);
+        wrapper.append(select, trigger, menu);
+        syncSelection();
+        select.addEventListener("change", syncSelection);
+        trigger.addEventListener("click", () => setOpen(trigger.getAttribute("aria-expanded") !== "true"));
+        trigger.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setOpen(true);
+                const selectedIndex = options.findIndex((option) => option.value === select.value);
+                menuOptions[selectedIndex >= 0 ? selectedIndex : 0]?.focus();
+            } else if (event.key === "Escape") {
+                setOpen(false);
+            }
+        });
+        menu.addEventListener("keydown", (event) => {
+            const currentIndex = menuOptions.indexOf(document.activeElement);
+            let nextIndex = currentIndex;
+            if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % menuOptions.length;
+            else if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + menuOptions.length) % menuOptions.length;
+            else if (event.key === "Home") nextIndex = 0;
+            else if (event.key === "End") nextIndex = menuOptions.length - 1;
+            else if (event.key === "Escape") {
+                trigger.focus();
+                setOpen(false);
+                return;
+            } else return;
+            event.preventDefault();
+            menuOptions[nextIndex]?.focus();
+        });
+        wrapper.addEventListener("pointerenter", (event) => {
+            if (event.pointerType === "mouse") setOpen(true);
+        });
+        wrapper.addEventListener("pointerleave", (event) => {
+            if (event.pointerType === "mouse") setOpen(false);
+        });
+        wrapper.addEventListener("focusin", (event) => {
+            if (event.target === trigger) setOpen(true);
+        });
+        wrapper.addEventListener("focusout", (event) => {
+            if (!wrapper.contains(event.relatedTarget)) setOpen(false);
+        });
+        window.addEventListener("resize", () => {
+            if (wrapper.classList.contains("is-open")) positionMenu();
+        });
+        window.addEventListener("scroll", () => {
+            if (wrapper.classList.contains("is-open")) positionMenu();
+        }, true);
+    });
+
+    document.querySelectorAll("[data-price-slider]").forEach((slider) => {
+        const range = slider.querySelector(".price-range-slider");
+        const minRange = slider.querySelector("[data-price-min]");
+        const maxRange = slider.querySelector("[data-price-max]");
+        const minOutput = slider.querySelector("[data-price-min-output]");
+        const maxOutput = slider.querySelector("[data-price-max-output]");
+        if (
+            !(range instanceof HTMLDivElement)
+            || !(minRange instanceof HTMLInputElement)
+            || !(maxRange instanceof HTMLInputElement)
+            || !(minOutput instanceof HTMLOutputElement)
+            || !(maxOutput instanceof HTMLOutputElement)
+        ) return;
+
+        const ceiling = Number(slider.dataset.sliderMax);
+        if (!Number.isFinite(ceiling) || ceiling <= 0) return;
+        const step = Number(minRange.step) || 1;
+        const formatPrice = (value) => new Intl.NumberFormat("en-US", {
+            maximumFractionDigits: 0,
+        }).format(value);
+        const normalize = (value) => Math.min(
+            ceiling,
+            Math.max(0, Math.round(Number(value) / step) * step),
+        );
+        minRange.value = String(normalize(minRange.value || 0));
+        maxRange.value = String(normalize(maxRange.value || ceiling));
+
+        const updateSlider = (changedRange) => {
+            let min = Number(minRange.value);
+            let max = Number(maxRange.value);
+            if (changedRange === minRange && min > max) {
+                max = min;
+                maxRange.value = String(max);
+            } else if (changedRange === maxRange && max < min) {
+                min = max;
+                minRange.value = String(min);
+            }
+
+            minRange.value = String(min);
+            maxRange.value = String(max);
+            minRange.style.zIndex = changedRange === minRange ? "4" : "2";
+            maxRange.style.zIndex = changedRange === maxRange || !changedRange ? "3" : "2";
+            minOutput.textContent = `Min ৳${formatPrice(min)}`;
+            maxOutput.textContent = `Max ৳${formatPrice(max)}`;
+            minRange.setAttribute("aria-valuetext", `Minimum price ৳${formatPrice(min)}`);
+            maxRange.setAttribute("aria-valuetext", `Maximum price ৳${formatPrice(max)}`);
+
+            const minPercent = ceiling ? min / ceiling * 100 : 0;
+            const maxPercent = ceiling ? max / ceiling * 100 : 100;
+            range.style.setProperty("--range-start", `${minPercent}%`);
+            range.style.setProperty("--range-end", `${maxPercent}%`);
+            minOutput.style.left = `${minPercent}%`;
+            maxOutput.style.left = `${maxPercent}%`;
+            minOutput.style.transform = minPercent < 8 ? "translateX(0)" : minPercent > 92 ? "translateX(-100%)" : "translateX(-50%)";
+            maxOutput.style.transform = maxPercent < 8 ? "translateX(0)" : maxPercent > 92 ? "translateX(-100%)" : "translateX(-50%)";
+        };
+
+        minRange.addEventListener("input", () => updateSlider(minRange));
+        maxRange.addEventListener("input", () => updateSlider(maxRange));
+        updateSlider();
+    });
+
     document.querySelectorAll("[data-cart-add]").forEach((form) => {
         form.addEventListener("submit", async (event) => {
             event.preventDefault();

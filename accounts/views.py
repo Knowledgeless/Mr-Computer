@@ -8,6 +8,8 @@ from django.contrib.auth.views import (
     PasswordResetDoneView,
     PasswordResetView,
 )
+
+from django.views.decorators.cache import never_cache
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -20,7 +22,7 @@ from cart.services import transfer_guest_cart
 from core.rate_limits import rate_limit
 from catalog.models import ProductVariant
 
-
+@never_cache
 @rate_limit(key="login", limit=8, period=300)
 def login(request):
     form = LoginForm(request=request, data=request.POST or None)
@@ -32,7 +34,7 @@ def login(request):
         messages.success(request, f"Welcome back, {request.user}!")
         destination = request.POST.get("next", "")
         if not url_has_allowed_host_and_scheme(destination, allowed_hosts={request.get_host()}):
-            destination = "accounts:overview"
+            destination = "/"
         return redirect(destination)
     return render(request, "accounts/login.html", {"form": form})
 

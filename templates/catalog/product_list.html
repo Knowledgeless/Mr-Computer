@@ -3,13 +3,25 @@
 {% block content %}
     <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Home</a></li><li class="breadcrumb-item active" aria-current="page">{% if category %}{{ category.name }}{% elif query %}Search results{% else %}Products{% endif %}</li></ol></nav>
     <div class="page-heading"><div><span class="eyebrow">Discover</span><h1>{% if category %}{{ category.name }}{% elif query %}Search results for “{{ query }}”{% else %}All products{% endif %}</h1><p class="text-secondary">{{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}</p></div></div>
-    <form class="filter-panel mb-4" method="get">
+    <form class="filter-panel search-filter-panel mb-4" method="get" data-search-filters>
         {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
-        <div class="row g-3 align-items-end">
+        <div class="search-filter-grid">
             {% for field in filter_form %}
-                {% if field.name != "q" %}<div class="col-6 col-lg-2"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>{% endif %}
+                {% if field.name == "brand" or field.name == "condition" or field.name == "sort" %}
+                    <div class="search-filter-field" data-filter-field data-filter-select>{{ field }}{{ field.label_tag }}{% for error in field.errors %}<div class="field-error">{{ error }}</div>{% endfor %}</div>
+                {% endif %}
             {% endfor %}
-            <div class="col-12 col-lg-auto"><button class="btn btn-primary" type="submit">Apply filters</button> <a class="btn btn-outline-secondary" href="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:product_list' %}{% endif %}">Clear</a></div>
+            <div class="search-filter-field search-filter-field--price" data-price-slider data-slider-max="{{ price_slider_max }}">
+                <span class="visually-hidden" id="price-range-label">Price range</span>
+                <div class="price-range-slider" role="group" aria-labelledby="price-range-label">
+                    <span class="price-range-slider__track" aria-hidden="true"></span>
+                    <output class="price-range-slider__value" data-price-min-output aria-live="polite">{{ filter_form.min_price.value|default:0|intcomma }}</output>
+                    {{ filter_form.min_price }}
+                    <output class="price-range-slider__value" data-price-max-output aria-live="polite">{{ filter_form.max_price.value|default:price_slider_max|intcomma }}</output>
+                    {{ filter_form.max_price }}
+                </div>
+            </div>
+            <div class="search-filter-actions"><button class="btn btn-primary" type="submit">Apply filters</button><a class="btn btn-outline-secondary" href="{% if category %}{% url 'catalog:category' category.slug %}{% else %}{% url 'catalog:product_list' %}{% endif %}">Clear</a></div>
         </div>
     </form>
     {% if filter_form.errors %}<div class="alert alert-warning" role="status">One or more filters were invalid and have been ignored.</div>{% endif %}

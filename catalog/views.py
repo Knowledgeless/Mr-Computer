@@ -1,7 +1,9 @@
+from decimal import Decimal, ROUND_CEILING
+
 from django.conf import settings
 from django import forms
 from django.core.paginator import Paginator
-from django.db.models import Avg, OuterRef, Prefetch, Q, Subquery
+from django.db.models import Avg, Max, OuterRef, Prefetch, Q, Subquery
 from django.shortcuts import get_object_or_404, render
 
 from catalog.models import Brand, Category, Product, ProductVariant
@@ -55,24 +57,68 @@ def _pagination_links(request, paginator, current_page):
     return links
 
 
+class PriceRangeInput(forms.NumberInput):
+    input_type = "range"
+
+
 class ProductFilterForm(forms.Form):
     q = forms.CharField(max_length=100, required=False)
-    brand = forms.ModelChoiceField(queryset=Brand.objects.filter(is_active=True), required=False)
-    condition = forms.ChoiceField(
-        choices=[("", "All conditions"), *Product.Condition.choices],
+    brand = forms.ModelChoiceField(
+        queryset=Brand.objects.filter(is_active=True),
         required=False,
+        empty_label="",
     )
-    min_price = forms.DecimalField(min_value=0, required=False)
-    max_price = forms.DecimalField(min_value=0, required=False)
+    condition = forms.ChoiceField(
+        choices=[("", ""), *Product.Condition.choices],
+        required=False,
+        label="Condition",
+    )
+    min_price = forms.DecimalField(
+        min_value=0,
+        required=False,
+        widget=PriceRangeInput(
+            attrs={
+                "class": "price-range-slider__input",
+                "min": "0",
+                "step": "100",
+                "data-price-min": "",
+                "aria-label": "Minimum price",
+            }
+        ),
+    )
+    max_price = forms.DecimalField(
+        min_value=0,
+        required=False,
+        widget=PriceRangeInput(
+            attrs={
+                "class": "price-range-slider__input",
+                "min": "0",
+                "step": "100",
+                "data-price-max": "",
+                "aria-label": "Maximum price",
+            }
+        ),
+    )
     sort = forms.ChoiceField(
         choices=[
+            ("", ""),
             ("newest", "Newest"),
             ("price_asc", "Price: low to high"),
             ("price_desc", "Price: high to low"),
             ("name", "Name"),
         ],
         required=False,
+        label="Sort by",
     )
+
+    def __init__(self, *args, price_slider_max=100000, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ("min_price", "max_price"):
+            self.fields[name].widget.attrs["max"] = str(price_slider_max)
+        for name in ("brand", "condition", "sort"):
+            self.fields[name].widget.attrs.update(
+                {"class": "form-select", "data-filter-control": ""}
+            )
 
 
 def home(request):
@@ -155,7 +201,22 @@ def product_list(request, category_slug=None):
         category = get_object_or_404(Category, slug=category_slug, is_active=True)
         products = products.filter(category=category)
 
-    form = ProductFilterForm(request.GET)
+    maximum_price = ProductVariant.objects.filter(
+        is_active=True,
+        product__is_active=True,
+        product__status__in=[Product.Status.ACTIVE, Product.Status.OUT_OF_STOCK],
+    ).aggregate(max_price=Max("selling_price"))["max_price"] or Decimal("0")
+    price_slider_max = int(
+        max(
+            Decimal("100"),
+            (maximum_price / Decimal("100")).to_integral_value(rounding=ROUND_CEILING)
+            * Decimal("100"),
+        )
+    )
+    filter_data = request.GET.copy()
+    filter_data.setdefault("min_price", "0")
+    filter_data.setdefault("max_price", str(price_slider_max))
+    form = ProductFilterForm(filter_data, price_slider_max=price_slider_max)
     form.is_valid()
     cleaned = form.cleaned_data if form.is_bound and not form.errors else {}
     query = cleaned.get("q", "").strip()
@@ -195,6 +256,7 @@ def product_list(request, category_slug=None):
             "category": category,
             "query": query,
             "filter_form": form,
+            "price_slider_max": price_slider_max,
             "pagination_links": pagination_links,
             "previous_page_url": _pagination_url(request, page_obj.previous_page_number) if page_obj.has_previous else "",
             "next_page_url": _pagination_url(request, page_obj.next_page_number) if page_obj.has_next else "",
