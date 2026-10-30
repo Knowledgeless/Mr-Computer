@@ -121,6 +121,41 @@
         });
     });
 
+    document.querySelectorAll("[data-cart-quantity]").forEach((form) => {
+        const input = form.querySelector("[data-quantity-input]");
+        const stepButtons = Array.from(form.querySelectorAll("[data-quantity-step]"));
+        if (!(input instanceof HTMLInputElement)) return;
+
+        const updateStepButtons = () => {
+            const quantity = Number(input.value);
+            stepButtons.forEach((button) => {
+                const step = Number(button.dataset.quantityStep);
+                button.disabled = step < 0
+                    ? quantity <= Number(input.min)
+                    : quantity >= Number(input.max);
+            });
+        };
+
+        stepButtons.forEach((button) => {
+            button.addEventListener("click", () => {
+                const step = Number(button.dataset.quantityStep);
+                const current = Number(input.value) || Number(input.min);
+                input.value = String(Math.max(
+                    Number(input.min),
+                    Math.min(Number(input.max), current + step),
+                ));
+                updateStepButtons();
+                if (form.reportValidity()) form.requestSubmit();
+            });
+        });
+
+        input.addEventListener("change", () => {
+            updateStepButtons();
+            if (form.reportValidity()) form.requestSubmit();
+        });
+        updateStepButtons();
+    });
+
     document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
         const updateThemeButton = () => {
             const isDark = document.documentElement.dataset.theme !== "light";

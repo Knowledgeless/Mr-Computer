@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Your Cart | Mr. Computers{% endblock %}
+{% block main_class %}px-5 py-4 py-lg-5{% endblock %}
 {% block content %}
     <div class="page-heading"><div><h1 class="eyebrow">Your cart</h1></div></div>
     {% if items %}
@@ -17,19 +18,21 @@
                                 <small class="text-secondary d-block">{{ item.variant.variant_name }} · {{ item.variant.sku }}</small>
                                 <strong class="d-block mt-2">৳ {{ item.variant.selling_price }}</strong>
                             </div>
-                            <form class="cart-line__quantity" action="{% url 'cart:update' item.pk %}" method="post">{% csrf_token %}
+                            <form class="cart-line__quantity" action="{% url 'cart:update' item.pk %}" method="post" data-cart-quantity>{% csrf_token %}
                                 <label class="visually-hidden" for="qty-{{ item.pk }}">Quantity</label>
-                                <input class="form-control" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="20" value="{{ item.quantity }}">
-                                <button class="btn btn-sm btn-outline-secondary mt-1" type="submit">Update</button>
+                                <button class="cart-quantity-step" type="button" data-quantity-step="-1" aria-label="Decrease quantity of {{ item.variant.product.name }}"><i class="bi bi-dash" aria-hidden="true"></i></button>
+                                <input class="form-control" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="20" step="1" value="{{ item.quantity }}" inputmode="numeric" data-quantity-input>
+                                <button class="cart-quantity-step" type="button" data-quantity-step="1" aria-label="Increase quantity of {{ item.variant.product.name }}"><i class="bi bi-plus" aria-hidden="true"></i></button>
                             </form>
-                            <div class="cart-line__total"><strong>৳ {{ item.line_total|floatformat:2 }}</strong>
-                            <form action="{% url 'cart:remove' item.pk %}" method="post">{% csrf_token %}<button class="btn btn-link text-danger p-0 mt-2" type="submit"> <i class="bi bi-trash-fill"></i> </button></form>
-                            <div class="cart-line__total"></div>
+                            <div class="cart-line__actions">
+                                <div class="cart-line__total"><strong>৳ {{ item.line_total|floatformat:2 }}</strong></div>
+                                <form class="cart-line__remove" action="{% url 'cart:remove' item.pk %}" method="post">{% csrf_token %}<button class="btn btn-link text-danger p-0" type="submit" aria-label="Remove {{ item.variant.product.name }} from cart"><i class="bi bi-trash-fill" aria-hidden="true"></i></button></form>
+                            </div>
                         </article>
                     {% endfor %}
                 </div>
             </div>
-            <aside class="col-lg-4">
+            <aside class="col-lg-4 cart-summary">
                 <div class="summary-card">
                     <h2 class="h4">Order summary</h2>
                     <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2 }}</strong></div>
@@ -43,7 +46,7 @@
                             <div class="small mt-2" data-coupon-result aria-live="polite"></div>
                         </form>
                     {% else %}<p class="small">Coupons are for signed-in customers. <a href="{% url 'accounts:login' %}">Sign in</a> to use one.</p>{% endif %}
-                    <a class="btn btn-primary btn-lg w-100 mt-3" href="{% url 'orders:checkout' %}">Continue to checkout</a>
+                    <a class="btn btn-primary btn-lg w-100 mt-3" href="{% url 'orders:checkout' %}">Checkout <i class="bi bi-arrow-right"></i></a>
                     <p class="small text-center text-secondary mt-3 mb-0"><i class="bi bi-shield-check"></i> Guest checkout is available. No account required.</p>
                 </div>
             </aside>
