@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.humanize",
 
     "accounts.apps.AccountsConfig",
     "catalog.apps.CatalogConfig",
@@ -131,6 +132,7 @@ TEMPLATES = [
         "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
+            "builtins": ["django.contrib.humanize.templatetags.humanize"],
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",

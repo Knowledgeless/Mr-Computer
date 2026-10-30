@@ -8,15 +8,8 @@
         <section class="hero-slider" data-home-slider aria-label="Featured promotions">
             {% for slide in slides %}
                 <article class="hero-slide{% if forloop.first %} is-active{% endif %}" data-hero-slide aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}">
-                    {% if slide.image %}<img class="hero-slide__image" src="{{ slide.image.url }}" alt="" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
-                    {% else %}<img class="hero-slide__image" src="{{ slide.image_url }}" alt="" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>{% endif %}
-                    <div class="hero-slide__shade"></div>
-                    <div class="hero-slide__copy">
-                        <span class="eyebrow">Your tech. Our priority.</span>
-                        <h1>{{ slide.title }}</h1>
-                        <p>{{ slide.subtitle|default:"Custom builds. Premium components. Expert support." }}</p>
-                        {% if slide.button_text and slide.button_url %}<a class="btn btn-primary btn-lg" href="{{ slide.button_url }}">{{ slide.button_text }} <i class="bi bi-arrow-right"></i></a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'pc_builder:builder' %}">Start building <i class="bi bi-arrow-right"></i></a>{% endif %}
-                    </div>
+                    {% if slide.image %}<img class="hero-slide__image" src="{{ slide.image.url }}" alt="{{ slide.title|default:'Featured promotion' }}" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>
+                    {% else %}<img class="hero-slide__image" src="{{ slide.image_url }}" alt="{{ slide.title|default:'Featured promotion' }}" {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}>{% endif %}
                 </article>
             {% endfor %}
             {% if slides|length > 1 %}
@@ -26,9 +19,10 @@
                     <button type="button" data-hero-next aria-label="Next slide"><i class="bi bi-arrow-right"></i></button>
                 </div>
             {% endif %}
-            {% if user.is_staff or user.is_superuser %}<a class="hero-slider__manage" href="{% url 'dashboard:content' %}"><i class="bi bi-pencil-square"></i> Manage slides</a>{% endif %}
         </section>
+        {% if user.is_staff or user.is_superuser %}<div class="hero-slider-tools"><a href="{% url 'dashboard:content' %}"><i class="bi bi-pencil-square"></i> Manage hero images</a></div>{% endif %}
     {% endwith %}
+    {% include "partials/home_ad_slot.html" with slot="horizontal" %}
     <div class="hero-benefits hero-benefits--strip">
         <div><i class="bi bi-shield-check"></i><span><strong>Top quality products</strong><small>Genuine & trusted</small></span></div>
         <div><i class="bi bi-tag"></i><span><strong>Best prices</strong><small>Great deals, always</small></span></div>
@@ -36,6 +30,7 @@
         <div><i class="bi bi-headset"></i><span><strong>Expert support</strong><small>Before & after sale</small></span></div>
     </div>
 
+    <div class="home-discovery-layout">
     <section class="home-categories" aria-labelledby="home-categories-title">
         <div class="section-heading">
             <div>
@@ -101,6 +96,8 @@
             {% endfor %}
         </div>
     </section>
+    {% include "partials/home_ad_slot.html" with slot="vertical" %}
+    </div>
 
     {% if demo_products %}
         <section class="content-section home-products">

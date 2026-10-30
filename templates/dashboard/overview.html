@@ -4,7 +4,7 @@
     <div class="dashboard-page-heading"><div><h1>Dashboard</h1><p>Overview of your store, sales and activities</p></div><div class="dashboard-date-chip"><i class="bi bi-calendar3"></i> {{ report.chart_days.0.label }} – {% now "M j, Y" %}</div></div>
 
     <section class="dashboard-kpis" aria-label="Store performance">
-        <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-blue"><i class="bi bi-currency-dollar"></i></span><div><small>Total sales this month</small><strong>৳ {{ report.month_sales|floatformat:2 }}</strong><span class="dashboard-kpi__caption">Paid, delivered orders</span></div></article>
+        <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-blue"><i class="bi bi-currency-dollar"></i></span><div><small>Total sales this month</small><strong>৳ {{ report.month_sales|floatformat:2|intcomma }}</strong><span class="dashboard-kpi__caption">Paid, delivered orders</span></div></article>
         <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-green"><i class="bi bi-bag-check"></i></span><div><small>Total orders</small><strong>{{ report.new_orders }}</strong><span class="dashboard-kpi__caption">Received today</span></div></article>
         <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-sky"><i class="bi bi-people"></i></span><div><small>Total customers</small><strong>{{ report.customers_count }}</strong><span class="dashboard-kpi__caption">Registered accounts</span></div></article>
         <article class="dashboard-kpi"><span class="dashboard-kpi__icon kpi-mint"><i class="bi bi-box-seam"></i></span><div><small>Products in stock</small><strong>{{ report.in_stock_products }}</strong><span class="dashboard-kpi__caption">{{ report.out_of_stock_count }} variants out of stock</span></div></article>
@@ -13,8 +13,8 @@
     <section class="dashboard-primary-grid">
         <article class="dashboard-panel sales-panel">
             <div class="dashboard-panel__heading"><div><h2>Sales overview</h2><p>Confirmed revenue over the last 30 days</p></div><span class="chart-legend"><i></i> Paid sales</span></div>
-            <div class="sales-chart" role="img" aria-label="Daily paid sales over the last 30 days, with a maximum of ৳ {{ report.chart_max|floatformat:0 }}">
-                <div class="sales-chart__axis"><span>৳ {{ report.chart_max|floatformat:0 }}</span><span>৳ 0</span></div><div class="sales-chart__bars">{% for day in report.chart_days %}<div class="sales-chart__bar-wrap" title="{{ day.label }}: ৳ {{ day.sales|floatformat:2 }}"><span class="sales-chart__bar" style="height:{{ day.height }}%"></span><small>{{ day.label }}</small></div>{% endfor %}</div>
+            <div class="sales-chart" role="img" aria-label="Daily paid sales over the last 30 days, with a maximum of ৳ {{ report.chart_max|floatformat:0|intcomma }}">
+                <div class="sales-chart__axis"><span>৳ {{ report.chart_max|floatformat:0|intcomma }}</span><span>৳ 0</span></div><div class="sales-chart__bars">{% for day in report.chart_days %}<div class="sales-chart__bar-wrap" title="{{ day.label }}: ৳ {{ day.sales|floatformat:2|intcomma }}"><span class="sales-chart__bar" style="height:{{ day.height }}%"></span><small>{{ day.label }}</small></div>{% endfor %}</div>
             </div>
         </article>
         <article class="dashboard-panel status-panel">
@@ -34,7 +34,7 @@
         </article>
         <article class="dashboard-panel">
             <div class="dashboard-panel__heading"><h2>Recent orders</h2><a href="{% url 'dashboard:orders' %}">View all</a></div>
-            <div class="table-responsive"><table class="table dashboard-compact-table"><thead><tr><th>Order #</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody>{% for order in report.recent_orders %}<tr><td><a href="{% url 'dashboard:order_detail' order.pk %}">#{{ order.order_number }}</a></td><td>{{ order.customer_name }}</td><td>৳ {{ order.total_amount|floatformat:0 }}</td><td><span class="status-pill">{{ order.get_order_status_display }}</span></td></tr>{% empty %}<tr><td colspan="4" class="dashboard-empty">New orders will appear here.</td></tr>{% endfor %}</tbody></table></div>
+            <div class="table-responsive"><table class="table dashboard-compact-table"><thead><tr><th>Order #</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead><tbody>{% for order in report.recent_orders %}<tr><td><a href="{% url 'dashboard:order_detail' order.pk %}">#{{ order.order_number }}</a></td><td>{{ order.customer_name }}</td><td>৳ {{ order.total_amount|floatformat:0|intcomma }}</td><td><span class="status-pill">{{ order.get_order_status_display }}</span></td></tr>{% empty %}<tr><td colspan="4" class="dashboard-empty">New orders will appear here.</td></tr>{% endfor %}</tbody></table></div>
         </article>
         <article class="dashboard-panel">
             <div class="dashboard-panel__heading"><h2>Low stock alert</h2><a href="{% url 'dashboard:inventory' %}">View all</a></div>

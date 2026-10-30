@@ -16,12 +16,25 @@
                 {% endif %}
             {% endif %}
         </div>
+        
         <div class="product-card__body">
+            {% if product.average_rating and product.average_rating >= 3 %}
+                <span class="d-inline-flex product-rating align-items-center gap-1">
+                    {% for _ in "12345" %}
+                        {% if forloop.counter <= product.average_rating %}
+                            <i class="bi bi-star-fill"></i>
+                        {% else %}
+                            <i class="bi bi-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                </span>
+            {% endif %}
+            
             <h3 class="product-card__title"><a href="{% url 'catalog:product_detail' product.slug %}">{{ product.name }}</a></h3>
-            {% if product.average_rating >= 3 %}<p class="product-rating" aria-label="Rated {{ product.average_rating|floatformat:1 }} out of 5"><i class="bi bi-star-fill"></i> {{ product.average_rating|floatformat:1 }}</p>{% endif %}
+            
             <div class="product-card__buy-row">
                 {% if variant %}
-                    <p class="product-price">৳ {{ variant.selling_price|floatformat:2 }}{% if variant.compare_at_price > variant.selling_price %}<del class="product-price__old">৳ {{ variant.compare_at_price|floatformat:2 }}</del>{% endif %}</p>
+                    <p class="product-price">৳ {{ variant.selling_price|floatformat:2|intcomma }}{% if variant.compare_at_price > variant.selling_price %}<del class="product-price__old">৳ {{ variant.compare_at_price|floatformat:2|intcomma }}</del>{% endif %}</p>
                     {% if variant.inventory.available_quantity > 0 %}
                         <form class="product-card__cart" action="{% url 'cart:add' %}" method="post" data-cart-add>
                             {% csrf_token %}

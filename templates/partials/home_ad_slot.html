@@ -1,0 +1,21 @@
+<section class="home-ad-slot home-ad-slot--{{ slot }}" data-ad-slot="{{ slot }}" aria-label="{% if slot == 'horizontal' %}Horizontal advertisement{% else %}Vertical advertisement{% endif %}">
+    <div class="home-ad-slot__creative">
+        <div class="home-ad-slot__placeholder" data-ad-placeholder>
+            <i class="bi bi-image" aria-hidden="true"></i>
+            <span>{% if slot == "horizontal" %}Horizontal ad space · 1200 × 240{% else %}Vertical ad space · 300 × 600{% endif %}</span>
+        </div>
+        <img class="home-ad-slot__image" data-ad-image alt="Advertisement" hidden>
+        <a class="home-ad-slot__click" data-ad-link aria-label="Visit advertiser" hidden></a>
+    </div>
+    {% if user.is_staff or user.is_superuser %}
+        <form class="home-ad-slot__editor" data-ad-editor="{{ slot }}">
+            <label class="form-label" for="ad-image-{{ slot }}">Upload or replace</label>
+            <input class="form-control" id="ad-image-{{ slot }}" type="file" accept="image/jpeg,image/png,image/webp" required>
+            <label class="visually-hidden" for="ad-link-{{ slot }}">Optional ad destination URL</label>
+            <input class="form-control" id="ad-link-{{ slot }}" type="url" placeholder="Optional destination URL">
+            <button class="btn btn-sm btn-primary" type="submit">Save ad</button>
+            <button class="btn btn-sm btn-outline-danger" type="button" data-ad-delete hidden>Delete ad</button>
+            <span class="home-ad-slot__note">Saved only in this browser.</span>
+        </form>
+    {% endif %}
+</section>

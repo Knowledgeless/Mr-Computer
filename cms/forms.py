@@ -12,7 +12,7 @@ class BannerForm(forms.ModelForm):
             "end_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
         help_texts = {
-            "image": "Use a 1200 × 630 px landscape image (JPEG, PNG or WebP, up to 300 KB).",
+            "image": "Use an image-only 1200 × 600 px banner (JPEG, PNG or WebP, up to 300 KB).",
         }
 
 

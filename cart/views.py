@@ -60,14 +60,28 @@ def add(request):
 def update(request, item_id):
     cart = get_cart_for_request(request)
     item = get_object_or_404(CartItem, pk=item_id, cart=cart)
+    is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
     form = UpdateCartItemForm(request.POST)
     if not form.is_valid():
+        if is_ajax:
+            return JsonResponse({"error": "Choose a quantity between 1 and 20."}, status=400)
         messages.error(request, "Choose a quantity between 1 and 20.")
         return redirect("cart:detail")
     try:
-        update_item_quantity(cart=cart, item_id=item.pk, quantity=form.cleaned_data["quantity"])
+        item = update_item_quantity(cart=cart, item_id=item.pk, quantity=form.cleaned_data["quantity"])
     except ValidationError as error:
+        if is_ajax:
+            return JsonResponse({"error": error.messages[0]}, status=400)
         messages.error(request, error.messages[0])
+        return redirect("cart:detail")
+    if is_ajax:
+        return JsonResponse(
+            {
+                "quantity": item.quantity,
+                "line_total": str(item.variant.selling_price * item.quantity),
+                "subtotal": str(cart_subtotal(cart)),
+            }
+        )
     return redirect("cart:detail")
 
 

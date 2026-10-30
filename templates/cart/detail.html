@@ -16,7 +16,7 @@
                             <div class="cart-line__info">
                                 <a class="fw-semibold" href="{% url 'catalog:product_detail' item.variant.product.slug %}">{{ item.variant.product.name }}</a>
                                 <small class="text-secondary d-block">{{ item.variant.variant_name }} · {{ item.variant.sku }}</small>
-                                <strong class="d-block mt-2">৳ {{ item.variant.selling_price }}</strong>
+                                <strong class="d-block mt-2">৳ {{ item.variant.selling_price|floatformat:2|intcomma }}</strong>
                             </div>
                             <form class="cart-line__quantity" action="{% url 'cart:update' item.pk %}" method="post" data-cart-quantity>{% csrf_token %}
                                 <label class="visually-hidden" for="qty-{{ item.pk }}">Quantity</label>
@@ -25,7 +25,7 @@
                                 <button class="cart-quantity-step" type="button" data-quantity-step="1" aria-label="Increase quantity of {{ item.variant.product.name }}"><i class="bi bi-plus" aria-hidden="true"></i></button>
                             </form>
                             <div class="cart-line__actions">
-                                <div class="cart-line__total"><strong>৳ {{ item.line_total|floatformat:2 }}</strong></div>
+                                <div class="cart-line__total"><strong data-cart-line-total>৳ {{ item.line_total|floatformat:2|intcomma }}</strong></div>
                                 <form class="cart-line__remove" action="{% url 'cart:remove' item.pk %}" method="post">{% csrf_token %}<button class="btn btn-link text-danger p-0" type="submit" aria-label="Remove {{ item.variant.product.name }} from cart"><i class="bi bi-trash-fill" aria-hidden="true"></i></button></form>
                             </div>
                         </article>
@@ -35,7 +35,7 @@
             <aside class="col-lg-4 cart-summary">
                 <div class="summary-card">
                     <h2 class="h4">Order summary</h2>
-                    <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2 }}</strong></div>
+                    <div class="summary-row"><span>Subtotal</span><strong data-cart-subtotal>৳ {{ subtotal|floatformat:2|intcomma }}</strong></div>
                     <div class="summary-row"><span>Delivery</span><span>Calculated at checkout</span></div>
                     <hr>
                     <p class="small text-secondary">Prices and stock are verified again when your order is placed.</p>

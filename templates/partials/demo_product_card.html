@@ -10,7 +10,7 @@
     <div class="product-card__body">
         <h3 class="product-card__title"><a href="{% url 'catalog:product_list' %}">{{ product.name }}</a></h3>
         <div class="product-card__buy-row">
-            <p class="product-price">৳ {{ product.price }}</p>
+            <p class="product-price">৳ {{ product.price|intcomma }}</p>
             <a class="product-card__cart" href="{% url 'catalog:product_list' %}" aria-label="Explore products"><i class="bi bi-cart-plus"></i></a>
         </div>
     </div>

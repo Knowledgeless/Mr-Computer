@@ -16,8 +16,8 @@
         </div>
         <aside class="col-lg-5"><div class="summary-card">
             <h2 class="h4">Your items</h2>
-            {% for item in items %}<div class="summary-row"><span>{{ item.quantity }} × {{ item.variant.product.name }}</span><strong>৳ {{ item.variant.selling_price|floatformat:2 }}</strong></div>{% endfor %}
-            <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2 }}</strong></div>
+            {% for item in items %}<div class="summary-row"><span>{{ item.quantity }} × {{ item.variant.product.name }}</span><strong>৳ {{ item.variant.selling_price|floatformat:2|intcomma }}</strong></div>{% endfor %}
+            <div class="summary-row"><span>Subtotal</span><strong>৳ {{ subtotal|floatformat:2|intcomma }}</strong></div>
             <hr><p class="small text-secondary">Final product prices, coupon, available stock and delivery fee are confirmed by the server when you place the order.</p>
             <div class="payment-option"><i class="bi bi-cash-coin"></i><span><strong>Cash on Delivery</strong><small>Pay when your order is delivered.</small></span></div>
             <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">Place order</button>

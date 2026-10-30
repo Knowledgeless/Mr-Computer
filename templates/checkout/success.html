@@ -1,5 +1,5 @@
 {% extends "base.html" %}
 {% block title %}Order placed | Mr. Computers{% endblock %}
 {% block content %}
-    <section class="success-panel"><div class="success-icon"><i class="bi bi-check-lg"></i></div><span class="eyebrow">Thank you</span><h1>Order placed successfully</h1><p>Our team will contact you to confirm delivery details.</p><div class="order-number">Order {{ order.order_number }}</div><p class="mt-3">Total due on delivery: <strong>৳ {{ order.total_amount|floatformat:2 }}</strong></p><a class="btn btn-primary mt-3" href="{% url 'catalog:product_list' %}">Continue shopping</a></section>
+    <section class="success-panel"><div class="success-icon"><i class="bi bi-check-lg"></i></div><span class="eyebrow">Thank you</span><h1>Order placed successfully</h1><p>Our team will contact you to confirm delivery details.</p><div class="order-number">Order {{ order.order_number }}</div><p class="mt-3">Total due on delivery: <strong>৳ {{ order.total_amount|floatformat:2|intcomma }}</strong></p><a class="btn btn-primary mt-3" href="{% url 'catalog:product_list' %}">Continue shopping</a></section>
 {% endblock %}
