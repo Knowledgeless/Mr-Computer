@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% if category %}{{ category.name }}{% elif query %}Search: {{ query }}{% else %}All Products{% endif %} | Mr. Computers{% endblock %}
 {% block content %}
-    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Home</a></li><li class="breadcrumb-item active" aria-current="page">{% if category %}{{ category.name }}{% elif query %}Search results{% else %}Products{% endif %}</li></ol></nav>
-    <div class="page-heading"><div><span class="eyebrow">Discover</span><h1>{% if category %}{{ category.name }}{% elif query %}Search results for “{{ query }}”{% else %}All products{% endif %}</h1><p class="text-secondary">{{ page_obj.paginator.count }} product{{ page_obj.paginator.count|pluralize }}</p></div></div>
+    <nav aria-label="Breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Home</a></li><li class="breadcrumb-item active" aria-current="page">{% if category %}{{ category.name }}{% elif query %}{{ query|title }}{% else %}Products{% endif %}</li></ol></nav>
+    
+    <h1>{% if category %}{{ category.name }}{% elif query %}Find Your {{ query|title }}{% else %}All Products{% endif %}</h1><p class="text-secondary">{{ page_obj.paginator.count }} Product{{ page_obj.paginator.count|pluralize }}</p></div></div>
     <form class="filter-panel search-filter-panel mb-4" method="get" data-search-filters>
         {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
         <div class="search-filter-grid">

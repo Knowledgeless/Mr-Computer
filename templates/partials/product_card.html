@@ -8,11 +8,17 @@
             </a>
             {% if variant %}
                 {% if user.is_authenticated %}
-                    <form class="product-card__wishlist" action="{% url 'accounts:wishlist_add' variant.pk %}" method="post">
-                        {% csrf_token %}<button type="submit" aria-label="Save {{ product.name }} to wishlist"><i class="bi bi-heart"></i></button>
-                    </form>
+                    {% if variant.pk in wishlist_variant_ids %}
+                        <form class="product-card__wishlist" action="{% url 'accounts:wishlist_remove_variant' variant.pk %}" method="post">
+                            {% csrf_token %}<button type="submit" aria-label="Remove {{ product.name }} from wishlist"><i class="bi bi-heart-fill"></i></button>
+                        </form>
+                    {% else %}
+                        <form class="product-card__wishlist" action="{% url 'accounts:wishlist_add' variant.pk %}" method="post" data-wishlist-add>
+                            {% csrf_token %}<button type="submit" aria-label="Save {{ product.name }} to wishlist"><i class="bi bi-heart"></i></button>
+                        </form>
+                    {% endif %}
                 {% else %}
-                    <a class="product-card__wishlist" href="{% url 'accounts:login' %}" aria-label="Sign in to save {{ product.name }} to your wishlist"><i class="bi bi-heart"></i></a>
+                    <a class="product-card__wishlist wishlist" href="{% url 'accounts:login' %}" aria-label="Sign in to save {{ product.name }} to your wishlist"><i class="bi bi-heart"></i></a>
                 {% endif %}
             {% endif %}
         </div>

@@ -147,6 +147,18 @@ def wishlist_remove(request, item_id):
     return redirect("accounts:wishlist")
 
 
+@require_POST
+@login_required
+def wishlist_remove_variant(request, variant_id):
+    deleted_count, _ = WishlistItem.objects.filter(
+        variant_id=variant_id,
+        wishlist__user=request.user,
+    ).delete()
+    if deleted_count:
+        messages.warning(request, "Removed from your wishlist..!")
+    return redirect("accounts:wishlist")
+
+
 class StorePasswordResetView(PasswordResetView):
     template_name = "accounts/password_reset.html"
     email_template_name = "accounts/password_reset_email.html"

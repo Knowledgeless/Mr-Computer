@@ -1730,19 +1730,13 @@ html[data-theme="dark"] .theme-toggle {
     width: 36px;
     height: 36px;
     place-items: center;
-    border: 1px solid rgb(148 163 184 / 25%);
+    border: 0;
     border-radius: 50%;
-    background: rgb(9 15 26 / 78%);
-    color: #f8fafc;
+    background: rgb(9 15 26 / 40%);
+    color: #ef4444;
     font-size: 1rem;
     backdrop-filter: blur(8px);
     transition: color 180ms ease, transform 180ms ease, background-color 180ms ease;
-}
-
-.product-card__wishlist:hover {
-    transform: scale(1.08);
-    background: #fff;
-    color: #ef4444;
 }
 
 .product-card__wishlist button {
@@ -1756,6 +1750,12 @@ html[data-theme="dark"] .theme-toggle {
     background: transparent;
     color: inherit;
     cursor: pointer;
+}
+
+.product-card__wishlist:hover {
+    transform: scale(1.08);
+    background: rgba(255, 255, 255);
+    color: #cf0000;
 }
 
 .product-card__body {
@@ -2214,5 +2214,75 @@ html[data-theme] .category-showcase__item {
     .product-pagination__arrow {
         min-width: 1.3rem;
         font-size: .9rem;
+    }
+}
+
+.js-enabled .home-page .home-products .row > [class*="col-"] {
+    opacity: 0;
+    transform: translateY(24px) scale(.985);
+    transition: opacity 620ms ease var(--product-reveal-delay, 0ms),
+        transform 620ms cubic-bezier(.2, .75, .25, 1) var(--product-reveal-delay, 0ms);
+    will-change: opacity, transform;
+}
+
+.js-enabled .home-page .home-products .row > [class*="col-"].is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.product-card__cart .add_to_cart_plus,
+.product-card__wishlist button,
+[data-cart-add] button,
+[data-wishlist-add] button {
+    position: relative;
+    isolation: isolate;
+}
+
+.product-action-burst {
+    position: absolute;
+    z-index: 0;
+    inset: -10px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgb(255 255 255 / 54%) 0 18%, rgb(91 232 192 / 34%) 40%, rgb(59 130 246 / 0%) 72%);
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(.2);
+}
+
+.is-animating .product-action-burst {
+    animation: product-color-spread 560ms cubic-bezier(.18, .65, .3, 1) both;
+}
+
+.product-card__cart .add_to_cart_plus > *,
+.product-card__wishlist button > *,
+[data-cart-add] button > *,
+[data-wishlist-add] button > * {
+    position: relative;
+    z-index: 1;
+}
+
+.product-card__cart .add_to_cart_plus.is-animating,
+.product-card__wishlist button.is-animating,
+[data-cart-add] button.is-animating,
+[data-wishlist-add] button.is-animating {
+    transform: scale(1.12);
+}
+
+@keyframes product-color-spread {
+    0% { opacity: .8; transform: scale(.2); }
+    55% { opacity: .48; }
+    100% { opacity: 0; transform: scale(1.35); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .js-enabled .home-page .home-products .row > [class*="col-"] {
+        opacity: 1;
+        transform: none;
+        transition: none;
+        will-change: auto;
+    }
+
+    .is-animating .product-action-burst {
+        animation: none;
     }
 }

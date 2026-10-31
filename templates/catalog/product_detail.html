@@ -29,7 +29,7 @@
                 <input class="form-control quantity-input mb-3" id="product-quantity" type="number" name="quantity" min="1" max="20" value="1" required>
                 <button class="btn btn-primary btn-lg" type="submit" {% if not default_variant or default_variant.inventory.available_quantity < 1 %}disabled{% endif %}>Add to cart</button>
             </form>
-            {% if user.is_authenticated and default_variant %}<form class="mt-2" action="{% url 'accounts:wishlist_add' default_variant.pk %}" method="post">{% csrf_token %}<button class="btn btn-outline-primary" type="submit"><i class="bi bi-heart"></i> Save to wishlist</button></form>{% elif not user.is_authenticated %}<a class="btn btn-outline-primary mt-2" href="{% url 'accounts:login' %}">Sign in to save to wishlist</a>{% endif %}
+            {% if user.is_authenticated and default_variant %}<form class="mt-2" action="{% url 'accounts:wishlist_add' default_variant.pk %}" method="post" data-wishlist-add>{% csrf_token %}<button class="btn btn-outline-primary" type="submit"><i class="bi bi-heart"></i> Save to wishlist</button></form>{% elif not user.is_authenticated %}<a class="btn btn-outline-primary mt-2" href="{% url 'accounts:login' %}">Sign in to save to wishlist</a>{% endif %}
             <div class="product-detail__description mt-5"><h2 class="h4">Product information</h2><div>{{ product.description|linebreaks }}</div></div>
             {% if default_variant.attribute_values.all %}
                 <h2 class="h4 mt-4">Specifications</h2>

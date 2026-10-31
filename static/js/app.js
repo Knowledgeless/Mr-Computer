@@ -1,5 +1,22 @@
 (() => {
     "use strict";
+    document.documentElement.classList.add("js-enabled");
+
+    const playProductActionAnimation = (button) => {
+        if (!(button instanceof HTMLElement)) return;
+        button.classList.remove("is-animating");
+        button.querySelector(".product-action-burst")?.remove();
+
+        const burst = document.createElement("span");
+        burst.className = "product-action-burst";
+        burst.setAttribute("aria-hidden", "true");
+        button.append(burst);
+        button.classList.add("is-animating");
+        window.setTimeout(() => {
+            button.classList.remove("is-animating");
+            burst.remove();
+        }, 620);
+    };
 
     const csrfCookie = document.cookie
         .split("; ")
@@ -362,6 +379,7 @@
                 document.querySelectorAll(".header-cart").forEach((link) => {
                     link.setAttribute("aria-label", `Cart, ${payload.cart_count} product types`);
                 });
+                playProductActionAnimation(button);
                 showToast(payload.message, "success");
             } catch (error) {
                 showToast(error instanceof Error ? error.message : "We couldn't add that product to your cart.", "error");
@@ -374,6 +392,38 @@
             }
         });
     });
+
+    document.querySelectorAll("[data-wishlist-add]").forEach((form) => {
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const button = form.querySelector('button[type="submit"]');
+            if (form.dataset.submitting === "true") return;
+            form.dataset.submitting = "true";
+            if (button) {
+                button.disabled = true;
+                playProductActionAnimation(button);
+            }
+            window.setTimeout(() => HTMLFormElement.prototype.submit.call(form), 360);
+        });
+    });
+
+    const productCards = document.querySelectorAll(".home-page .home-products .row > [class*='col-']");
+    if ("IntersectionObserver" in window && productCards.length) {
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+            });
+        }, { threshold: 0.12, rootMargin: "0px 0px -32px 0px" });
+
+        productCards.forEach((card, index) => {
+            card.style.setProperty("--product-reveal-delay", `${Math.min(index % 4, 3) * 70}ms`);
+            revealObserver.observe(card);
+        });
+    } else {
+        productCards.forEach((card) => card.classList.add("is-visible"));
+    }
 
     document.querySelectorAll("[data-cart-quantity]").forEach((form) => {
         const input = form.querySelector("[data-quantity-input]");
