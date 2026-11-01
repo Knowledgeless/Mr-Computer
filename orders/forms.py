@@ -47,14 +47,6 @@ class CheckoutForm(forms.Form):
             attrs={"data-location-level": "city", "class": "form-select", "disabled": True},
         )
     )
-    area = forms.CharField(
-        label="Area",
-        required=False,
-        widget=forms.Select(
-            choices=[("", "Choose an area")],
-            attrs={"data-location-level": "area", "class": "form-select", "disabled": True},
-        ),
-    )
     postal_code = forms.CharField(
         max_length=20,
         widget=forms.TextInput(attrs={"autocomplete": "postal-code", "readonly": True, "placeholder": " "}),
@@ -75,7 +67,7 @@ class CheckoutForm(forms.Form):
         self.fields["division"].choices = [("", "Choose a division")] + [
             (division, division) for division in sorted(postal_locations)
         ]
-        for name in ("division", "district", "upazila", "area"):
+        for name in ("division", "district", "upazila"):
             self.fields[name].widget.attrs["data-selected"] = (
                 self.data.get(name, "") if self.is_bound else self.initial.get(name, "")
             )
@@ -92,16 +84,14 @@ class CheckoutForm(forms.Form):
         ):
             self.add_error("upazila", "Choose a valid division, district, and upazila.")
         city = cleaned_data.get("upazila")
-        area = cleaned_data.get("area")
         postal_code = cleaned_data.get("postal_code")
         if division and district and city and postal_code and not is_valid_postal_location(
             division=division,
             district=district,
             city=city,
-            area=area or "",
             postal_code=postal_code,
         ):
-            self.add_error("postal_code", "Choose a valid city and area to set the postal code.")
+            self.add_error("postal_code", "Choose a valid upazila to set the postal code.")
         return cleaned_data
 
     def address_snapshot(self):
@@ -114,6 +104,5 @@ class CheckoutForm(forms.Form):
             "district": self.cleaned_data["district"],
             "upazila": self.cleaned_data["upazila"],
             "city": self.cleaned_data["upazila"].strip(),
-            "area": self.cleaned_data["area"].strip(),
             "postal_code": self.cleaned_data["postal_code"].strip(),
         }

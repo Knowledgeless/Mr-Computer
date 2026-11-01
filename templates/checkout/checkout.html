@@ -15,13 +15,12 @@
                     <div class="col-12" data-delivery-location data-postal-url="{% static 'data/bangladesh-postal-codes.json' %}" data-quote-url="{% url 'orders:shipping_quote' %}">
                         <div class="row g-3">
                             {% for field in form %}{% if field.name == "division" or field.name == "district" or field.name == "upazila" %}<div class="col-md-4 form-field checkout-field">{{ field.label_tag }}{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}
+                            <div class="col-md-6 form-field checkout-field">{{ form.postal_code.label_tag }}{{ form.postal_code }}{{ form.postal_code.errors }}</div>
                         </div>
                         <p class="form-text mb-0">Delivery charges are based on your selected upazila.</p>
                         <p class="small text-danger mt-2 mb-0" data-location-error role="status" hidden></p>
                     </div>
-                    <div class="col-md-6 form-field checkout-field">{{ form.area.label_tag }}{{ form.area }}{{ form.area.errors }}</div>
                     <div class="col-12 form-field checkout-field">{{ form.address_line_1.label_tag }}{{ form.address_line_1 }}{{ form.address_line_1.errors }}</div>
-                    <div class="col-md-6 form-field checkout-field">{{ form.postal_code.label_tag }}{{ form.postal_code }}{{ form.postal_code.errors }}</div>
                 </div>
             </section>
             <section class="form-section mt-4"><h2 class="h4">Order note</h2><div class="form-field checkout-field">{{ form.customer_note.label_tag }}{{ form.customer_note }}{{ form.customer_note.errors }}</div></section>

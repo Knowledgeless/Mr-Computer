@@ -1,0 +1,46 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Delivery charges | Dashboard{% endblock %}
+{% block dashboard_content %}
+    <div class="page-heading"><div><span class="eyebrow">Store management</span><h1>Delivery charges</h1><p class="text-secondary mb-0">Set delivery rates by division, district, and upazila.</p></div></div>
+    <section class="form-section mb-4">
+        <h2 class="h5">Add delivery zone</h2>
+        <form method="post" class="row g-3">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="col-12 alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            {% for field in form %}
+                <div class="col-md-6 form-field">
+                    {{ field.label_tag }}{{ field }}
+                    {% if field.errors %}<div class="field-error">{{ field.errors }}</div>{% endif %}
+                </div>
+            {% endfor %}
+            <div class="col-12"><button class="btn btn-primary" type="submit">Add zone</button></div>
+        </form>
+    </section>
+    {% for row in zone_rows %}
+        <section class="form-section mb-4">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                <div><h2 class="h5 mb-1">{{ row.zone.name }}</h2><p class="small text-secondary mb-0">{{ row.zone.division }} · {{ row.zone.district }} · {{ row.zone.upazila }}{% if not row.zone.is_active %} · Inactive{% endif %}</p></div>
+            </div>
+            {% for item in row.rates %}
+                <form method="post" action="{% url 'dashboard:shipping_rate_edit' row.zone.pk item.rate.pk %}" class="row g-3 align-items-end border-top py-3">
+                    {% csrf_token %}
+                    {% for field in item.form %}
+                        <div class="col-md-3 form-field">{{ field.label_tag }}{{ field }}{% if field.errors %}<div class="field-error">{{ field.errors }}</div>{% endif %}</div>
+                    {% endfor %}
+                    <div class="col-md-2"><button class="btn btn-outline-primary" type="submit">Save rate</button></div>
+                </form>
+            {% empty %}
+                <p class="small text-secondary border-top pt-3">No rates configured. The store's default delivery charge will be used.</p>
+            {% endfor %}
+            <form method="post" action="{% url 'dashboard:shipping_rate_create' row.zone.pk %}" class="row g-3 align-items-end border-top pt-3">
+                {% csrf_token %}
+                {% for field in row.new_rate_form %}
+                    <div class="col-md-3 form-field">{{ field.label_tag }}{{ field }}{% if field.errors %}<div class="field-error">{{ field.errors }}</div>{% endif %}</div>
+                {% endfor %}
+                <div class="col-md-2"><button class="btn btn-primary" type="submit">Add rate</button></div>
+            </form>
+        </section>
+    {% empty %}
+        <div class="empty-state"><i class="bi bi-truck"></i><p>No delivery zones configured yet.</p></div>
+    {% endfor %}
+{% endblock %}

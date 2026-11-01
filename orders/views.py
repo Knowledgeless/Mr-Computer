@@ -57,21 +57,18 @@ def checkout(request):
             initial.update(
                 customer_phone=address.phone,
                 address_line_1=address.address_line_1,
-                area=address.area,
                 postal_code=address.postal_code,
             )
             address_location_found = False
             for division, districts in get_postal_locations().items():
                 for district, cities in districts.items():
                     city_data = cities.get(address.city)
-                    valid_areas = {item["name"] for item in city_data["areas"]} if city_data else set()
-                    if city_data and (not address.area or address.area in valid_areas):
+                    if city_data:
                         initial.update(
                             division=division,
                             district=district,
                             upazila=address.city,
-                            area=address.area,
-                            postal_code=address.postal_code or city_data["postalCode"],
+                            postal_code=city_data["postalCode"],
                         )
                         address_location_found = True
                         break

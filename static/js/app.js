@@ -114,7 +114,6 @@
         const divisionSelect = picker.querySelector('[data-location-level="division"]');
         const districtSelect = picker.querySelector('[data-location-level="district"]');
         const citySelect = picker.querySelector('[data-location-level="city"]');
-        const areaSelect = picker.querySelector('[data-location-level="area"]');
         const postalCodeInput = picker.querySelector('input[name="postal_code"]');
         const errorElement = picker.querySelector("[data-location-error]");
         const shippingOutput = document.querySelector("[data-checkout-shipping]");
@@ -122,6 +121,7 @@
         const subtotal = Number(totalOutput?.dataset.subtotal);
         let postalLocations = {};
         let quoteController;
+        const locationSelectUis = new Map();
 
         const setError = (message) => {
             if (!errorElement) return;
@@ -134,6 +134,141 @@
             values.forEach((value) => select.add(new Option(value, value)));
             select.value = values.includes(preferredValue) ? preferredValue : "";
             select.disabled = values.length === 0;
+            locationSelectUis.get(select)?.();
+        };
+
+        const enhanceLocationSelect = (select) => {
+            const field = select.closest(".checkout-field");
+            const label = field?.querySelector("label");
+            if (!field || !label) return;
+
+            const wrapper = document.createElement("div");
+            const trigger = document.createElement("button");
+            const triggerText = document.createElement("span");
+            const icon = document.createElement("i");
+            const menu = document.createElement("div");
+            const triggerId = `${select.id}-trigger`;
+            const menuId = `${select.id}-menu`;
+
+            wrapper.className = "search-filter-select checkout-location-select";
+            trigger.className = "search-filter-select__trigger";
+            trigger.type = "button";
+            trigger.id = triggerId;
+            trigger.setAttribute("aria-haspopup", "listbox");
+            trigger.setAttribute("aria-expanded", "false");
+            trigger.setAttribute("aria-labelledby", label.id || `${select.id}-label`);
+            trigger.setAttribute("aria-controls", menuId);
+            icon.className = "bi bi-chevron-down";
+            icon.setAttribute("aria-hidden", "true");
+            menu.className = "search-filter-select__menu checkout-location-select__menu";
+            menu.id = menuId;
+            menu.setAttribute("role", "listbox");
+            menu.setAttribute("aria-labelledby", label.id || `${select.id}-label`);
+            label.id = label.id || `${select.id}-label`;
+            label.htmlFor = triggerId;
+            select.classList.add("search-filter-select__native");
+            select.tabIndex = -1;
+            select.setAttribute("aria-hidden", "true");
+
+            const syncOptions = () => {
+                const options = Array.from(select.options).filter((option) => option.value);
+                triggerText.textContent = options.find((option) => option.value === select.value)?.textContent.trim() || "";
+                trigger.disabled = select.disabled;
+                menu.replaceChildren();
+                options.forEach((option) => {
+                    const optionButton = document.createElement("button");
+                    optionButton.type = "button";
+                    optionButton.className = "search-filter-select__option";
+                    optionButton.setAttribute("role", "option");
+                    optionButton.setAttribute("aria-selected", String(option.value === select.value));
+                    optionButton.tabIndex = -1;
+                    optionButton.textContent = option.textContent.trim();
+                    if (option.value === select.value) optionButton.classList.add("is-selected");
+                    optionButton.addEventListener("click", () => {
+                        select.value = option.value;
+                        select.dispatchEvent(new Event("change", { bubbles: true }));
+                        trigger.focus();
+                        setOpen(false);
+                    });
+                    menu.append(optionButton);
+                });
+            };
+
+            const positionMenu = () => {
+                const rect = trigger.getBoundingClientRect();
+                const padding = 12;
+                const width = Math.min(Math.max(rect.width, 220), window.innerWidth - padding * 2);
+                menu.style.position = "fixed";
+                menu.style.width = `${width}px`;
+                menu.style.left = `${Math.min(Math.max(rect.left, padding), window.innerWidth - width - padding)}px`;
+                menu.style.maxHeight = `${Math.min(360, window.innerHeight - padding * 2)}px`;
+                menu.style.overflowY = "auto";
+                menu.style.gridTemplateColumns = "minmax(0, 1fr)";
+                const menuHeight = menu.getBoundingClientRect().height;
+                const belowSpace = window.innerHeight - rect.bottom - padding;
+                const aboveSpace = rect.top - padding;
+                menu.style.top = menuHeight <= belowSpace || belowSpace >= aboveSpace
+                    ? `${rect.bottom + 6}px`
+                    : `${Math.max(padding, rect.top - menuHeight - 6)}px`;
+            };
+
+            const setOpen = (isOpen) => {
+                wrapper.classList.toggle("is-open", isOpen);
+                trigger.setAttribute("aria-expanded", String(isOpen));
+                field.classList.toggle("has-value", isOpen || Boolean(select.value));
+                if (isOpen) positionMenu();
+            };
+
+            triggerText.className = "checkout-location-select__value";
+            trigger.append(triggerText, icon);
+            select.replaceWith(wrapper);
+            wrapper.append(select, trigger, menu);
+            locationSelectUis.set(select, syncOptions);
+            syncOptions();
+            select.addEventListener("change", syncOptions);
+            trigger.addEventListener("click", () => setOpen(trigger.getAttribute("aria-expanded") !== "true"));
+            trigger.addEventListener("keydown", (event) => {
+                if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setOpen(true);
+                    const firstOption = menu.querySelector('[role="option"]:not([aria-selected="true"])')
+                        || menu.querySelector('[role="option"]');
+                    firstOption?.focus();
+                } else if (event.key === "Escape") {
+                    setOpen(false);
+                }
+            });
+            menu.addEventListener("keydown", (event) => {
+                const options = Array.from(menu.querySelectorAll('[role="option"]'));
+                const currentIndex = options.indexOf(document.activeElement);
+                let nextIndex = currentIndex;
+                if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % options.length;
+                else if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + options.length) % options.length;
+                else if (event.key === "Home") nextIndex = 0;
+                else if (event.key === "End") nextIndex = options.length - 1;
+                else if (event.key === "Escape") {
+                    trigger.focus();
+                    setOpen(false);
+                    return;
+                } else return;
+                event.preventDefault();
+                options[nextIndex]?.focus();
+            });
+            wrapper.addEventListener("pointerenter", (event) => {
+                if (event.pointerType === "mouse" && !trigger.disabled) setOpen(true);
+            });
+            wrapper.addEventListener("pointerleave", (event) => {
+                if (event.pointerType === "mouse") setOpen(false);
+            });
+            wrapper.addEventListener("focusout", (event) => {
+                if (!wrapper.contains(event.relatedTarget)) setOpen(false);
+            });
+            window.addEventListener("resize", () => {
+                if (wrapper.classList.contains("is-open")) positionMenu();
+            });
+            window.addEventListener("scroll", () => {
+                if (wrapper.classList.contains("is-open")) positionMenu();
+            }, true);
         };
 
         const updateQuote = async () => {
@@ -159,8 +294,15 @@
                 const response = await fetch(url, {
                     credentials: "same-origin",
                     signal: quoteController.signal,
-                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    headers: {
+                        Accept: "application/json",
+                        "X-Requested-With": "XMLHttpRequest",
+                    },
                 });
+                const contentType = response.headers.get("content-type") || "";
+                if (!contentType.includes("application/json")) {
+                    throw new Error("We couldn't calculate the delivery fee. Please try again.");
+                }
                 const payload = await response.json();
                 if (!response.ok) throw new Error(payload.error || "We couldn't calculate the delivery fee.");
                 if (shippingOutput) {
@@ -180,7 +322,6 @@
         if (!(divisionSelect instanceof HTMLSelectElement)
             || !(districtSelect instanceof HTMLSelectElement)
             || !(citySelect instanceof HTMLSelectElement)
-            || !(areaSelect instanceof HTMLSelectElement)
             || !(postalCodeInput instanceof HTMLInputElement)) return;
 
         fetch(picker.dataset.postalUrl, { credentials: "same-origin" })
@@ -193,42 +334,35 @@
                 const division = divisionSelect.dataset.selected || "";
                 const district = districtSelect.dataset.selected || "";
                 const city = citySelect.dataset.selected || "";
-                const area = areaSelect.dataset.selected || "";
                 const cities = () => Object.keys(
                     postalLocations[divisionSelect.value]?.[districtSelect.value] || {},
                 ).sort();
-                const areas = () => (
-                    postalLocations[divisionSelect.value]?.[districtSelect.value]?.[citySelect.value]?.areas || []
-                );
                 const updatePostalCode = () => {
                     const cityData = postalLocations[divisionSelect.value]?.[districtSelect.value]?.[citySelect.value];
-                    const selectedArea = areas().find((item) => item.name === areaSelect.value);
-                    postalCodeInput.value = selectedArea?.postalCode || cityData?.postalCode || "";
+                    postalCodeInput.value = cityData?.postalCode || "";
+                    postalCodeInput.dispatchEvent(new Event("input", { bubbles: true }));
+                    postalCodeInput.dispatchEvent(new Event("change", { bubbles: true }));
                 };
                 fillSelect(divisionSelect, Object.keys(postalLocations).sort(), "Choose a division", division);
                 fillSelect(districtSelect, Object.keys(postalLocations[divisionSelect.value] || {}).sort(), "Choose a district", district);
                 fillSelect(citySelect, cities(), "Choose a city / upazila", city);
-                fillSelect(areaSelect, areas().map((item) => item.name), "Choose an area", area);
                 updatePostalCode();
+                [divisionSelect, districtSelect, citySelect].forEach(enhanceLocationSelect);
                 divisionSelect.addEventListener("change", () => {
                     fillSelect(districtSelect, Object.keys(postalLocations[divisionSelect.value] || {}).sort(), "Choose a district");
                     fillSelect(citySelect, [], "Choose a city / upazila");
-                    fillSelect(areaSelect, [], "Choose an area");
                     updatePostalCode();
                     updateQuote();
                 });
                 districtSelect.addEventListener("change", () => {
                     fillSelect(citySelect, cities(), "Choose a city / upazila");
-                    fillSelect(areaSelect, [], "Choose an area");
                     updatePostalCode();
                     updateQuote();
                 });
                 citySelect.addEventListener("change", () => {
-                    fillSelect(areaSelect, areas().map((item) => item.name), "Choose an area");
                     updatePostalCode();
                     updateQuote();
                 });
-                areaSelect.addEventListener("change", updatePostalCode);
                 updateQuote();
             })
             .catch((error) => setError(error.message || "We couldn't load delivery areas. Please refresh the page."));

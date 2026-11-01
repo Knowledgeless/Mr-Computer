@@ -18,7 +18,7 @@ from cms.forms import BannerForm, HomeSectionForm, PageForm, SiteSettingsForm
 from cms.models import Banner, HomeSection, Page, SiteSettings
 from core.slugs import unique_slug
 from dashboard.access import dashboard_role
-from dashboard.forms import CustomerRoleForm, OrderStatusForm
+from dashboard.forms import CustomerRoleForm, OrderStatusForm, ShippingRateForm, ShippingZoneForm
 from inventory.forms import InventoryAdjustmentForm
 from inventory.models import Inventory, InventoryTransaction
 from inventory.services import adjust_stock
@@ -27,6 +27,7 @@ from orders.services import update_order_status
 from promotions.forms import CouponForm
 from promotions.models import Coupon
 from reports.services import dashboard_report, sales_by_day
+from shipping.models import ShippingRate, ShippingZone
 
 
 def _product_snapshot(product):
@@ -448,6 +449,71 @@ def settings_form(request):
         messages.success(request, "Store settings saved.")
         return redirect("dashboard:settings")
     return render(request, "dashboard/form_page.html", {"form": form, "title": "Store settings"})
+
+
+@dashboard_role("shipping")
+def shipping_management(request):
+    zones = list(ShippingZone.objects.prefetch_related("rates"))
+    form = ShippingZoneForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        zone = form.save()
+        log_event(action="SHIPPING_ZONE_SAVED", instance=zone, user=request.user, request=request)
+        messages.success(request, "Delivery zone saved.")
+        return redirect("dashboard:shipping")
+    zone_rows = [
+        {
+            "zone": zone,
+            "rates": [
+                {"rate": rate, "form": ShippingRateForm(instance=rate)}
+                for rate in zone.rates.all()
+            ],
+            "new_rate_form": ShippingRateForm(),
+        }
+        for zone in zones
+    ]
+    return render(
+        request,
+        "dashboard/shipping.html",
+        {
+            "form": form,
+            "zone_rows": zone_rows,
+        },
+    )
+
+
+@require_POST
+@dashboard_role("shipping")
+def shipping_rate_create(request, zone_id):
+    zone = get_object_or_404(ShippingZone, pk=zone_id)
+    form = ShippingRateForm(request.POST)
+    if form.is_valid():
+        rate = form.save(commit=False)
+        rate.zone = zone
+        rate.save()
+        log_event(action="SHIPPING_RATE_SAVED", instance=rate, user=request.user, request=request)
+        messages.success(request, f"Delivery charge saved for {zone.name}.")
+    else:
+        messages.error(request, "; ".join(
+            error for errors in form.errors.values() for error in errors
+        ))
+    return redirect("dashboard:shipping")
+
+
+@require_POST
+@dashboard_role("shipping")
+def shipping_rate_edit(request, zone_id, rate_id):
+    zone = get_object_or_404(ShippingZone, pk=zone_id)
+    rate = get_object_or_404(ShippingRate, pk=rate_id, zone=zone)
+    form = ShippingRateForm(request.POST, instance=rate)
+    if form.is_valid():
+        rate = form.save()
+        log_event(action="SHIPPING_RATE_SAVED", instance=rate, user=request.user, request=request)
+        messages.success(request, f"Delivery charge saved for {zone.name}.")
+    else:
+        messages.error(request, "; ".join(
+            error for errors in form.errors.values() for error in errors
+        ))
+    return redirect("dashboard:shipping")
 
 
 @dashboard_role("customers")

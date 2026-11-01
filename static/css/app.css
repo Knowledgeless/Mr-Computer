@@ -212,7 +212,7 @@ textarea.form-control { min-height: 110px; }
 .checkout-field { position: relative; }
 .checkout-field > label {
     position: absolute;
-    z-index: 1;
+    z-index: 3;
     top: .55rem;
     left: .8rem;
     max-width: calc(100% - 3rem);
@@ -226,12 +226,16 @@ textarea.form-control { min-height: 110px; }
     white-space: nowrap;
     transition: top 140ms ease, color 140ms ease, font-size 140ms ease;
 }
+.checkout-field:hover > label,
 .checkout-field:focus-within > label,
 .checkout-field.has-value > label {
     top: -.55rem;
     color: var(--mc-accent);
     font-size: .75rem;
 }
+.checkout-field .checkout-location-select { width: 100%; }
+.checkout-location-select__value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.checkout-location-select__menu { grid-template-columns: minmax(0, 1fr) !important; }
 .checkout-field input::placeholder,
 .checkout-field textarea::placeholder { color: transparent; }
 .field-error { color: var(--mc-danger); font-size: .875rem; }
@@ -287,7 +291,7 @@ textarea.form-control { min-height: 110px; }
 .search-filter-field { position: relative; min-width: 0; }
 .search-filter-select__trigger { 
     width: 100%; 
-    height: 48px; 
+    height: 48px;
     min-height: 48px; 
     padding: 0.42rem 1.2rem .35rem .85rem; 
     border: 1px solid var(--mc-border); 
@@ -310,7 +314,7 @@ textarea.form-control { min-height: 110px; }
     transition: border-color 150ms ease, box-shadow 150ms ease; 
 }
 .search-filter-select__trigger:focus-visible { 
-    outline: none; 
+    outline: none;
     border-color: var(--mc-accent); 
     box-shadow: 0 0 0 .2rem rgb(37 99 235 / 14%); }
 .search-filter-select__trigger > .bi { flex: 0 0 auto; color: var(--mc-text-muted); font-size: .75rem; transition: transform 150ms ease; }

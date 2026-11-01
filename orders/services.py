@@ -79,7 +79,7 @@ def create_order_from_cart(
 
     variant_ids = [item.variant_id for item in cart_items]
     variants = list(
-        ProductVariant.objects.select_for_update()
+        ProductVariant.objects.select_for_update(of=("self",))
         .filter(pk__in=variant_ids, is_active=True, product__is_active=True)
         .select_related("product", "product__category", "product__brand")
         .order_by("pk")

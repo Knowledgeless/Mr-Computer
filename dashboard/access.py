@@ -40,6 +40,14 @@ ROLE_PERMISSIONS = {
         CustomerProfile.Role.CONTENT_MANAGER,
     },
     "customers": {CustomerProfile.Role.OWNER, CustomerProfile.Role.ADMIN, CustomerProfile.Role.MANAGER},
+    "shipping": {
+        CustomerProfile.Role.OWNER,
+        CustomerProfile.Role.ADMIN,
+        CustomerProfile.Role.MANAGER,
+        CustomerProfile.Role.INVENTORY_MANAGER,
+        CustomerProfile.Role.ORDER_MANAGER,
+        CustomerProfile.Role.CONTENT_MANAGER,
+    },
 }
 
 

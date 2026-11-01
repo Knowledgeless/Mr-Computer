@@ -29,19 +29,11 @@ def is_valid_delivery_location(*, division, district, upazila):
     )
 
 
-def is_valid_postal_location(*, division, district, city, area, postal_code):
+def is_valid_postal_location(*, division, district, city, postal_code):
     city_data = get_postal_locations().get(division, {}).get(district, {}).get(city)
     if city_data is None:
         return False
     expected_postal_code = city_data["postalCode"]
-    if area:
-        area_data = next(
-            (item for item in city_data["areas"] if item["name"] == area),
-            None,
-        )
-        if area_data is None:
-            return False
-        expected_postal_code = area_data["postalCode"] or expected_postal_code
     return bool(expected_postal_code) and postal_code == expected_postal_code
 
 
