@@ -178,6 +178,62 @@ textarea.form-control { min-height: 110px; }
 .form-field input:not([type=checkbox]):not([type=radio]), .form-field select, .form-field textarea { width: 100%; }
 .form-field input[type=checkbox] { margin-right: .45rem; }
 .form-field ul.errorlist, .errorlist { margin: .35rem 0 0; padding-left: 1.15rem; color: var(--mc-danger); font-size: .875rem; list-style: none; }
+.storefront-body main form input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=range]),
+.storefront-body main form select,
+.storefront-body main form textarea {
+    min-height: 40px;
+    padding: .5rem .75rem;
+    border: 1px solid var(--mc-border);
+    border-radius: var(--mc-radius-sm);
+    background-color: var(--mc-surface);
+    color: var(--mc-text);
+    transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.storefront-body main form textarea { min-height: 110px; }
+.storefront-body main form select {
+    appearance: none;
+    padding-right: 2.5rem;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--mc-text-muted) 50%),
+        linear-gradient(135deg, var(--mc-text-muted) 50%, transparent 50%);
+    background-position: calc(100% - 17px) 17px, calc(100% - 12px) 17px;
+    background-repeat: no-repeat;
+    background-size: 5px 5px, 5px 5px;
+}
+.storefront-body main form input:not([type=range]):focus,
+.storefront-body main form select:focus,
+.storefront-body main form textarea:focus {
+    border-color: var(--mc-accent);
+    box-shadow: 0 0 0 .2rem rgb(37 99 235 / 14%);
+    outline: 0;
+}
+.storefront-body main form input:not([type=range]):disabled,
+.storefront-body main form select:disabled { cursor: not-allowed; opacity: .58; }
+.checkout-field { position: relative; }
+.checkout-field > label {
+    position: absolute;
+    z-index: 1;
+    top: .55rem;
+    left: .8rem;
+    max-width: calc(100% - 3rem);
+    overflow: hidden;
+    padding: 0 .2rem;
+    background: var(--mc-surface);
+    color: var(--mc-text-muted);
+    cursor: text;
+    pointer-events: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: top 140ms ease, color 140ms ease, font-size 140ms ease;
+}
+.checkout-field:focus-within > label,
+.checkout-field.has-value > label {
+    top: -.55rem;
+    color: var(--mc-accent);
+    font-size: .75rem;
+}
+.checkout-field input::placeholder,
+.checkout-field textarea::placeholder { color: transparent; }
 .field-error { color: var(--mc-danger); font-size: .875rem; }
 .helptext { display: block; margin-top: .25rem; color: var(--mc-text-muted); font-size: .82rem; }
 

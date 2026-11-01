@@ -9,11 +9,21 @@ from core.models import UUIDTimeStampedModel
 
 class ShippingZone(UUIDTimeStampedModel):
     name = models.CharField(max_length=100, unique=True)
+    division = models.CharField(max_length=40, blank=True)
+    district = models.CharField(max_length=60, blank=True)
+    upazila = models.CharField(max_length=80, blank=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["division", "district", "upazila"],
+                condition=~Q(division="") & ~Q(district="") & ~Q(upazila=""),
+                name="unique_shipping_location",
+            ),
+        ]
 
     def __str__(self):
         return self.name

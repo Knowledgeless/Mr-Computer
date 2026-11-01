@@ -95,6 +95,145 @@
     document.querySelectorAll("[data-toast]").forEach(startToast);
     window.MrComputers = { ...window.MrComputers, showToast };
 
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted && document.querySelector("[data-auth-page]")) {
+            window.location.reload();
+        }
+    });
+
+    document.querySelectorAll(".checkout-field").forEach((field) => {
+        const control = field.querySelector("input, select, textarea");
+        if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) return;
+        const updateValue = () => field.classList.toggle("has-value", Boolean(control.value));
+        updateValue();
+        control.addEventListener("input", updateValue);
+        control.addEventListener("change", updateValue);
+    });
+
+    document.querySelectorAll("[data-delivery-location]").forEach((picker) => {
+        const divisionSelect = picker.querySelector('[data-location-level="division"]');
+        const districtSelect = picker.querySelector('[data-location-level="district"]');
+        const citySelect = picker.querySelector('[data-location-level="city"]');
+        const areaSelect = picker.querySelector('[data-location-level="area"]');
+        const postalCodeInput = picker.querySelector('input[name="postal_code"]');
+        const errorElement = picker.querySelector("[data-location-error]");
+        const shippingOutput = document.querySelector("[data-checkout-shipping]");
+        const totalOutput = document.querySelector("[data-checkout-total]");
+        const subtotal = Number(totalOutput?.dataset.subtotal);
+        let postalLocations = {};
+        let quoteController;
+
+        const setError = (message) => {
+            if (!errorElement) return;
+            errorElement.textContent = message;
+            errorElement.hidden = !message;
+        };
+
+        const fillSelect = (select, values, placeholder, preferredValue = "") => {
+            select.replaceChildren(new Option(placeholder, ""));
+            values.forEach((value) => select.add(new Option(value, value)));
+            select.value = values.includes(preferredValue) ? preferredValue : "";
+            select.disabled = values.length === 0;
+        };
+
+        const updateQuote = async () => {
+            if (!divisionSelect.value || !districtSelect.value || !citySelect.value) {
+                if (shippingOutput) shippingOutput.textContent = "Choose a city";
+                if (totalOutput && Number.isFinite(subtotal)) {
+                    totalOutput.textContent = `৳ ${subtotal.toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                }
+                return;
+            }
+
+            quoteController?.abort();
+            quoteController = new AbortController();
+            setError("");
+            if (shippingOutput) shippingOutput.textContent = "Calculating…";
+            try {
+                const url = new URL(picker.dataset.quoteUrl, window.location.origin);
+                url.search = new URLSearchParams({
+                    division: divisionSelect.value,
+                    district: districtSelect.value,
+                    upazila: citySelect.value,
+                });
+                const response = await fetch(url, {
+                    credentials: "same-origin",
+                    signal: quoteController.signal,
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                });
+                const payload = await response.json();
+                if (!response.ok) throw new Error(payload.error || "We couldn't calculate the delivery fee.");
+                if (shippingOutput) {
+                    shippingOutput.textContent = `৳ ${Number(payload.shipping).toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                }
+                if (totalOutput) {
+                    totalOutput.textContent = `৳ ${Number(payload.total).toLocaleString("en-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                }
+            } catch (error) {
+                if (error.name === "AbortError") return;
+                if (shippingOutput) shippingOutput.textContent = "Unavailable";
+                if (totalOutput) totalOutput.textContent = "Unavailable";
+                setError(error.message || "We couldn't calculate the delivery fee. Please try again.");
+            }
+        };
+
+        if (!(divisionSelect instanceof HTMLSelectElement)
+            || !(districtSelect instanceof HTMLSelectElement)
+            || !(citySelect instanceof HTMLSelectElement)
+            || !(areaSelect instanceof HTMLSelectElement)
+            || !(postalCodeInput instanceof HTMLInputElement)) return;
+
+        fetch(picker.dataset.postalUrl, { credentials: "same-origin" })
+            .then((response) => {
+                if (!response.ok) throw new Error("We couldn't load the delivery areas.");
+                return response.json();
+            })
+            .then((postalData) => {
+                postalLocations = postalData.locations;
+                const division = divisionSelect.dataset.selected || "";
+                const district = districtSelect.dataset.selected || "";
+                const city = citySelect.dataset.selected || "";
+                const area = areaSelect.dataset.selected || "";
+                const cities = () => Object.keys(
+                    postalLocations[divisionSelect.value]?.[districtSelect.value] || {},
+                ).sort();
+                const areas = () => (
+                    postalLocations[divisionSelect.value]?.[districtSelect.value]?.[citySelect.value]?.areas || []
+                );
+                const updatePostalCode = () => {
+                    const cityData = postalLocations[divisionSelect.value]?.[districtSelect.value]?.[citySelect.value];
+                    const selectedArea = areas().find((item) => item.name === areaSelect.value);
+                    postalCodeInput.value = selectedArea?.postalCode || cityData?.postalCode || "";
+                };
+                fillSelect(divisionSelect, Object.keys(postalLocations).sort(), "Choose a division", division);
+                fillSelect(districtSelect, Object.keys(postalLocations[divisionSelect.value] || {}).sort(), "Choose a district", district);
+                fillSelect(citySelect, cities(), "Choose a city / upazila", city);
+                fillSelect(areaSelect, areas().map((item) => item.name), "Choose an area", area);
+                updatePostalCode();
+                divisionSelect.addEventListener("change", () => {
+                    fillSelect(districtSelect, Object.keys(postalLocations[divisionSelect.value] || {}).sort(), "Choose a district");
+                    fillSelect(citySelect, [], "Choose a city / upazila");
+                    fillSelect(areaSelect, [], "Choose an area");
+                    updatePostalCode();
+                    updateQuote();
+                });
+                districtSelect.addEventListener("change", () => {
+                    fillSelect(citySelect, cities(), "Choose a city / upazila");
+                    fillSelect(areaSelect, [], "Choose an area");
+                    updatePostalCode();
+                    updateQuote();
+                });
+                citySelect.addEventListener("change", () => {
+                    fillSelect(areaSelect, areas().map((item) => item.name), "Choose an area");
+                    updatePostalCode();
+                    updateQuote();
+                });
+                areaSelect.addEventListener("change", updatePostalCode);
+                updateQuote();
+            })
+            .catch((error) => setError(error.message || "We couldn't load delivery areas. Please refresh the page."));
+    });
+
     document.querySelectorAll("[data-search-filters] [data-filter-field]").forEach((field) => {
         const control = field.querySelector("[data-filter-control]");
         if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement)) return;

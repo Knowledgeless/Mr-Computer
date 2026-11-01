@@ -1,15 +1,42 @@
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_GET, require_http_methods
 
 from cart.services import cart_subtotal, get_cart_for_request
+from cms.models import SiteSettings
 from core.rate_limits import rate_limit
 from core.security import fingerprint
 from orders.forms import CheckoutForm
 from orders.models import Order
 from orders.services import create_order_from_cart
+from shipping.services import calculate_shipping, get_postal_locations, get_shipping_zone, is_valid_delivery_location
+
+
+@require_GET
+def shipping_quote(request):
+    division = request.GET.get("division", "")
+    district = request.GET.get("district", "")
+    upazila = request.GET.get("upazila", "")
+    if not is_valid_delivery_location(division=division, district=district, upazila=upazila):
+        return JsonResponse({"error": "Select a valid division, district, and upazila."}, status=400)
+
+    cart = get_cart_for_request(request)
+    subtotal = cart_subtotal(cart)
+    zone = get_shipping_zone(division=division, district=district, upazila=upazila)
+    shipping_cost = calculate_shipping(
+        zone_id=zone.pk if zone else None,
+        subtotal=subtotal,
+        fallback_cost=SiteSettings.get_solo().default_shipping_cost,
+    )
+    return JsonResponse(
+        {
+            "shipping": str(shipping_cost),
+            "total": str(subtotal + shipping_cost),
+            "currency": "BDT",
+        }
+    )
 
 
 @require_http_methods(["GET", "POST"])
@@ -30,15 +57,35 @@ def checkout(request):
             initial.update(
                 customer_phone=address.phone,
                 address_line_1=address.address_line_1,
-                address_line_2=address.address_line_2,
-                city=address.city,
                 area=address.area,
                 postal_code=address.postal_code,
             )
+            address_location_found = False
+            for division, districts in get_postal_locations().items():
+                for district, cities in districts.items():
+                    city_data = cities.get(address.city)
+                    valid_areas = {item["name"] for item in city_data["areas"]} if city_data else set()
+                    if city_data and (not address.area or address.area in valid_areas):
+                        initial.update(
+                            division=division,
+                            district=district,
+                            upazila=address.city,
+                            area=address.area,
+                            postal_code=address.postal_code or city_data["postalCode"],
+                        )
+                        address_location_found = True
+                        break
+                if address_location_found:
+                    break
     if request.method == "GET":
         initial["coupon_code"] = request.session.get("applied_coupon", "")
     form = CheckoutForm(request.POST or None, initial=initial if request.method == "GET" else None)
     if request.method == "POST" and form.is_valid():
+        shipping_zone = get_shipping_zone(
+            division=form.cleaned_data["division"],
+            district=form.cleaned_data["district"],
+            upazila=form.cleaned_data["upazila"],
+        )
         try:
             order = create_order_from_cart(
                 cart_id=cart.pk,
@@ -49,7 +96,7 @@ def checkout(request):
                 shipping_address=form.address_snapshot(),
                 customer_note=form.cleaned_data["customer_note"],
                 coupon_code=form.cleaned_data["coupon_code"] or request.session.get("applied_coupon", ""),
-                shipping_zone_id=form.cleaned_data["shipping_zone"].pk if form.cleaned_data["shipping_zone"] else None,
+                shipping_zone_id=shipping_zone.pk if shipping_zone else None,
                 request=request,
             )
         except ValidationError as error:

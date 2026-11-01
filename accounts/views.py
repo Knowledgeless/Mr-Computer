@@ -12,7 +12,7 @@ from django.contrib.auth.views import (
 from django.views.decorators.cache import never_cache
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
@@ -25,6 +25,11 @@ from catalog.models import ProductVariant
 @never_cache
 @rate_limit(key="login", limit=8, period=300)
 def login(request):
+    if request.user.is_authenticated:
+        destination = request.GET.get("next", "")
+        if not url_has_allowed_host_and_scheme(destination, allowed_hosts={request.get_host()}):
+            destination = reverse("accounts:overview")
+        return redirect(destination)
     form = LoginForm(request=request, data=request.POST or None)
     if request.method == "POST" and form.is_valid():
         session_key = request.session.session_key
@@ -39,8 +44,11 @@ def login(request):
     return render(request, "accounts/login.html", {"form": form})
 
 
+@never_cache
 @rate_limit(key="register", limit=5, period=3600)
 def register(request):
+    if request.user.is_authenticated:
+        return redirect("accounts:overview")
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         session_key = request.session.session_key
